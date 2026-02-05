@@ -29,10 +29,14 @@
 // - ``DSDivider``: Themed horizontal/vertical divider
 // - ``DSDividerOrientation``: Divider orientation (horizontal, vertical)
 //
-// ### Loading (Planned)
+// ### Loading
 //
-// - `DSLoader`: Indeterminate spinner
-// - `DSProgress`: Progress bar and ring
+// - ``DSLoader``: Indeterminate spinner with size and color variants
+// - ``DSLoaderSize``: Loader size variants (small, medium, large, xl)
+// - ``DSLoaderColor``: Loader color modes (accent, primary, secondary, custom)
+// - ``DSProgress``: Determinate progress bar and ring
+// - ``DSProgressStyle``: Progress visual style (linear, circular)
+// - ``DSProgressSize``: Progress size variants (small, medium, large)
 
 import SwiftUI
 import DSCore
@@ -63,6 +67,15 @@ import DSTheme
 /// - ``DSCard``
 /// - ``DSDivider``
 /// - ``DSDividerOrientation``
+///
+/// ### Loading Components
+///
+/// - ``DSLoader``
+/// - ``DSLoaderSize``
+/// - ``DSLoaderColor``
+/// - ``DSProgress``
+/// - ``DSProgressStyle``
+/// - ``DSProgressSize``
 public enum DSPrimitivesModule {
     /// Current version of the primitives module.
     public static let version = "0.1.0"

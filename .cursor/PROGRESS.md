@@ -17,9 +17,9 @@
 
 ## Current Status
 
-**Phase:** 3 - Primitives (In Progress)  
-**Current Step:** 12 - DSSurface and DSCard Primitives (Done)  
-**Progress:** 12 / 39 steps completed  
+**Phase:** 3 - Primitives (Complete)  
+**Current Step:** 13 - DSLoader Primitive (Done)  
+**Progress:** 13 / 39 steps completed  
 
 ---
 
@@ -38,11 +38,11 @@
 - [x] Step 8: DSStyles Spec Protocols
 - [x] Step 9: DSStyles Default Implementations
 
-### Phase 3: Primitives (3/4)
+### Phase 3: Primitives (4/4) ✓
 - [x] Step 10: DSText Primitive
 - [x] Step 11: DSIcon Primitive
 - [x] Step 12: DSSurface and DSCard Primitives
-- [ ] Step 13: DSLoader Primitive
+- [x] Step 13: DSLoader Primitive
 
 ### Phase 4: Controls MVP (0/6)
 - [ ] Step 14: DSButton Control
@@ -85,6 +85,45 @@
 ---
 
 ## Session Log
+
+### Session 13 - 2026-02-05
+**Completed:**
+- Step 13: DSLoader Primitive — Loading and progress indicators
+  - Created `Sources/DSPrimitives/DSLoader.swift` — Indeterminate spinner:
+    - `DSLoaderSize` enum: small (16pt), medium (20pt), large (24pt), xl (32pt) — matches DSIconSize
+    - `DSLoaderColor` enum: accent, primary, secondary, custom(Color) — resolves from theme
+    - `DSLoader` view: rotating arc spinner with accent color
+    - Reduce motion: falls back to pulsing opacity animation instead of rotation
+    - Accessibility: "Loading" label, `.updatesFrequently` trait
+    - Previews for all sizes, colors, reduce motion, and in-context usage (button loading)
+  - Created `Sources/DSPrimitives/DSProgress.swift` — Determinate progress indicators:
+    - `DSProgressStyle` enum: linear (horizontal bar), circular (ring)
+    - `DSProgressSize` enum: small, medium, large — with separate dimensions for linear/circular
+    - Linear progress: fills left-to-right, track uses `border.subtle`, fill uses accent color
+    - Circular progress: ring fills clockwise from top, same track/fill coloring
+    - Both styles support `DSLoaderColor` for fill color customization
+    - Animated fill transitions respecting reduce motion (instant when reduced)
+    - Accessibility: percentage value, "Progress" label, `.updatesFrequently` trait
+    - Previews for all sizes, values, colors, both styles, and in-context usage (download card)
+  - Updated `Sources/DSPrimitives/DSPrimitives.swift` — Added Loading section to module documentation:
+    - DSLoader, DSLoaderSize, DSLoaderColor, DSProgress, DSProgressStyle, DSProgressSize
+  - Updated Showcase for all platforms:
+    - iOS: `DSLoaderShowcaseView` with sizes, colors, linear/circular progress, interactive slider, in-context examples
+    - macOS: `DSLoaderShowcasemacOSView` with two-column layout, all features
+    - watchOS: `DSLoaderShowcasewatchOSView` compact layout with all key features
+    - All three platforms route `"dsloader"` item to their respective showcase views
+
+**Artifacts:**
+- `Sources/DSPrimitives/DSLoader.swift` — Indeterminate spinner primitive
+- `Sources/DSPrimitives/DSProgress.swift` — Linear bar and circular ring progress
+- `Sources/DSPrimitives/DSPrimitives.swift` — Updated module docs
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` — iOS loader showcase
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` — macOS loader showcase
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` — watchOS loader showcase
+
+**Phase 3: Primitives — COMPLETE** (4/4 steps done)
+
+---
 
 ### Session 12b - 2026-02-05
 **Completed:**
