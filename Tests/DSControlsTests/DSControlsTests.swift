@@ -285,3 +285,225 @@ struct DSButtonSpecResolutionTests {
         }
     }
 }
+
+// MARK: - DSToggle Spec Resolution Tests
+
+@Suite("DSToggle Spec Resolution")
+struct DSToggleSpecResolutionTests {
+    
+    let lightTheme = DSTheme.light
+    let darkTheme = DSTheme.dark
+    
+    // MARK: - On/Off States
+    
+    @Test("On state uses accent track color")
+    func testOnStateTrackColor() {
+        let spec = DSToggleSpec.resolve(
+            theme: lightTheme,
+            isOn: true,
+            state: .normal
+        )
+        // On state should use accent primary color
+        #expect(spec.trackColor == lightTheme.colors.accent.primary)
+    }
+    
+    @Test("Off state uses surface elevated track color")
+    func testOffStateTrackColor() {
+        let spec = DSToggleSpec.resolve(
+            theme: lightTheme,
+            isOn: false,
+            state: .normal
+        )
+        #expect(spec.trackColor == lightTheme.colors.bg.surfaceElevated)
+    }
+    
+    @Test("On state has no border")
+    func testOnStateNoBorder() {
+        let spec = DSToggleSpec.resolve(
+            theme: lightTheme,
+            isOn: true,
+            state: .normal
+        )
+        #expect(spec.trackBorderWidth == 0)
+        #expect(spec.trackBorderColor == .clear)
+    }
+    
+    @Test("Off state has border")
+    func testOffStateBorder() {
+        let spec = DSToggleSpec.resolve(
+            theme: lightTheme,
+            isOn: false,
+            state: .normal
+        )
+        #expect(spec.trackBorderWidth == 1.0)
+        #expect(spec.trackBorderColor == lightTheme.colors.border.subtle)
+    }
+    
+    // MARK: - Disabled State
+    
+    @Test("Disabled state reduces opacity")
+    func testDisabledOpacity() {
+        let normal = DSToggleSpec.resolve(theme: lightTheme, isOn: true, state: .normal)
+        let disabled = DSToggleSpec.resolve(theme: lightTheme, isOn: true, state: .disabled)
+        
+        #expect(normal.opacity == 1.0)
+        #expect(disabled.opacity == 0.5)
+    }
+    
+    @Test("Disabled on state uses reduced accent")
+    func testDisabledOnTrackColor() {
+        let spec = DSToggleSpec.resolve(
+            theme: lightTheme,
+            isOn: true,
+            state: .disabled
+        )
+        // Disabled on uses accent with reduced opacity
+        #expect(spec.opacity == 0.5)
+    }
+    
+    // MARK: - Dimensions
+    
+    @Test("Track has standard dimensions")
+    func testTrackDimensions() {
+        let spec = DSToggleSpec.resolve(
+            theme: lightTheme,
+            isOn: true,
+            state: .normal
+        )
+        #expect(spec.trackWidth == 51)
+        #expect(spec.trackHeight == 31)
+        #expect(spec.trackCornerRadius == spec.trackHeight / 2)
+    }
+    
+    @Test("Thumb has standard size")
+    func testThumbSize() {
+        let spec = DSToggleSpec.resolve(
+            theme: lightTheme,
+            isOn: true,
+            state: .normal
+        )
+        #expect(spec.thumbSize == 27)
+        #expect(spec.thumbColor == .white)
+    }
+    
+    @Test("Thumb has shadow")
+    func testThumbShadow() {
+        let spec = DSToggleSpec.resolve(
+            theme: lightTheme,
+            isOn: true,
+            state: .normal
+        )
+        #expect(spec.thumbShadow.radius > 0)
+    }
+    
+    // MARK: - Animation
+    
+    @Test("Toggle spec has animation")
+    func testAnimation() {
+        let spec = DSToggleSpec.resolve(
+            theme: lightTheme,
+            isOn: true,
+            state: .normal
+        )
+        #expect(spec.animation != nil)
+    }
+    
+    // MARK: - Dark Theme
+    
+    @Test("Dark theme uses dark accent color")
+    func testDarkThemeAccent() {
+        let lightSpec = DSToggleSpec.resolve(theme: lightTheme, isOn: true, state: .normal)
+        let darkSpec = DSToggleSpec.resolve(theme: darkTheme, isOn: true, state: .normal)
+        
+        // Both use accent primary, but accent differs between light and dark themes
+        #expect(lightSpec.trackColor != darkSpec.trackColor)
+    }
+    
+    // MARK: - Theme Convenience
+    
+    @Test("Theme resolveToggle convenience method works")
+    func testThemeResolveToggle() {
+        let direct = DSToggleSpec.resolve(
+            theme: lightTheme,
+            isOn: true,
+            state: .normal
+        )
+        let convenience = lightTheme.resolveToggle(
+            isOn: true,
+            state: .normal
+        )
+        
+        #expect(direct.trackWidth == convenience.trackWidth)
+        #expect(direct.trackHeight == convenience.trackHeight)
+        #expect(direct.thumbSize == convenience.thumbSize)
+        #expect(direct.opacity == convenience.opacity)
+    }
+    
+    // MARK: - All Combinations
+    
+    @Test("All on/off and state combinations resolve without errors")
+    func testAllCombinations() {
+        let themes = [DSTheme.light, DSTheme.dark]
+        let onStates = [true, false]
+        let controlStates: [DSControlState] = [.normal, .disabled, .hovered]
+        
+        for theme in themes {
+            for isOn in onStates {
+                for state in controlStates {
+                    let spec = DSToggleSpec.resolve(
+                        theme: theme,
+                        isOn: isOn,
+                        state: state
+                    )
+                    #expect(spec.trackWidth > 0)
+                    #expect(spec.trackHeight > 0)
+                    #expect(spec.thumbSize > 0)
+                    #expect(spec.opacity > 0)
+                    #expect(spec.opacity <= 1.0)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - DSCheckboxState Tests
+
+@Suite("DSCheckboxState")
+struct DSCheckboxStateTests {
+    
+    @Test("All cases are defined")
+    func testAllCases() {
+        let cases = DSCheckboxState.allCases
+        #expect(cases.count == 3)
+        #expect(cases.contains(.unchecked))
+        #expect(cases.contains(.checked))
+        #expect(cases.contains(.intermediate))
+    }
+    
+    @Test("isActive returns correct values")
+    func testIsActive() {
+        #expect(DSCheckboxState.unchecked.isActive == false)
+        #expect(DSCheckboxState.checked.isActive == true)
+        #expect(DSCheckboxState.intermediate.isActive == true)
+    }
+    
+    @Test("Display names are correct")
+    func testDisplayNames() {
+        #expect(DSCheckboxState.unchecked.displayName == "Unchecked")
+        #expect(DSCheckboxState.checked.displayName == "Checked")
+        #expect(DSCheckboxState.intermediate.displayName == "Intermediate")
+    }
+    
+    @Test("States have unique IDs")
+    func testUniqueIDs() {
+        let ids = DSCheckboxState.allCases.map(\.id)
+        #expect(Set(ids).count == ids.count)
+    }
+    
+    @Test("Equatable conformance works")
+    func testEquatable() {
+        #expect(DSCheckboxState.checked == DSCheckboxState.checked)
+        #expect(DSCheckboxState.unchecked != DSCheckboxState.checked)
+        #expect(DSCheckboxState.intermediate != DSCheckboxState.unchecked)
+    }
+}

@@ -18,8 +18,8 @@
 ## Current Status
 
 **Phase:** 4 - Controls MVP (In Progress)  
-**Current Step:** 14 - DSButton Control (Done)  
-**Progress:** 14 / 39 steps completed  
+**Current Step:** 15 - DSToggle Control (Done)  
+**Progress:** 15 / 39 steps completed  
 
 ---
 
@@ -44,9 +44,9 @@
 - [x] Step 12: DSSurface and DSCard Primitives
 - [x] Step 13: DSLoader Primitive
 
-### Phase 4: Controls MVP (1/6)
+### Phase 4: Controls MVP (2/6)
 - [x] Step 14: DSButton Control
-- [ ] Step 15: DSToggle Control
+- [x] Step 15: DSToggle Control
 - [ ] Step 16: DSTextField Control
 - [ ] Step 17: DSPicker Control
 - [ ] Step 18: DSStepper Control
@@ -85,6 +85,81 @@
 ---
 
 ## Session Log
+
+### Session 15 - 2026-02-06
+**Completed:**
+- Step 15: DSToggle Control — Toggle switch and macOS checkbox
+  - Created `Sources/DSControls/DSToggle.swift` — Toggle switch view:
+    - `DSToggle` view wrapping SwiftUI's native Toggle with theme integration
+    - Theme accent tint via `theme.colors.accent.primary`
+    - Resolves `DSToggleSpec` from theme for opacity (disabled state)
+    - Animation from spec's `animation` property
+    - `LocalizedStringKey`, `StringProtocol`, and label-less initializers
+    - Disabled state with 0.5 opacity from spec
+    - SwiftUI's native Toggle accessibility (toggle trait, state announcements)
+    - Comprehensive previews: on/off, disabled, label-less, all states (light + dark)
+  - Created `Sources/DSControls/DSCheckbox.swift` — Checkbox control:
+    - `DSCheckboxState` enum: unchecked, checked, intermediate (CaseIterable, Identifiable)
+    - `DSCheckbox` view with custom-rendered checkbox indicator
+    - 20×20pt indicator with 5pt corner radius, continuous corner style
+    - Checked/intermediate: accent fill + white SF Symbol icon (checkmark/minus)
+    - Unchecked: clear fill + strong border
+    - Hover support via `capabilities.supportsHover` (macOS gets hover effects)
+    - Hover effect: lighter accent fill for checked, surfaceElevated fill for unchecked, accent-tinted border
+    - Disabled state: 0.5 opacity, non-interactive
+    - `DSCheckboxState` binding for full three-state support
+    - `Bool` binding convenience for simple checked/unchecked use
+    - `LocalizedStringKey`, `StringProtocol`, and label-less initializers
+    - Animated transitions using theme's toggle animation
+    - Accessibility: `.isToggle` trait, state value announced, hint text
+    - Comprehensive previews: all states, disabled, bool binding, multi-select list pattern (light + dark)
+  - Updated `Sources/DSControls/DSControls.swift` — Module documentation:
+    - Added DocC Topics section listing DSToggle, DSCheckbox, DSCheckboxState
+  - Added 18 unit tests in `Tests/DSControlsTests/DSControlsTests.swift`:
+    - `DSToggleSpecResolutionTests` (13 tests):
+      - On/off state track color tests
+      - On/off border tests
+      - Disabled opacity test (0.5)
+      - Track dimensions test (51×31pt)
+      - Thumb size test (27pt, white, with shadow)
+      - Animation presence test
+      - Dark theme accent color difference test
+      - Theme convenience method test
+      - All combinations matrix test (2 themes × 2 on/off × 3 states)
+    - `DSCheckboxStateTests` (5 tests):
+      - All cases count (3)
+      - isActive property (unchecked=false, checked/intermediate=true)
+      - Display names correctness
+      - Unique IDs
+      - Equatable conformance
+  - Updated Showcase for all platforms:
+    - iOS: `DSToggleShowcaseView` — toggle states, label-less toggle, settings pattern with icons, checkbox states, multi-select pattern, resolved spec details
+    - macOS: `DSToggleShowcasemacOSView` — two-column layout with toggle states + settings on left, checkbox + multi-select + list context on right, spec table
+    - watchOS: `DSToggleShowcasewatchOSView` — compact layout with toggle on/off, disabled, settings pattern, checkbox states, spec info
+    - All three platforms route `"dstoggle"` item to their respective showcase views
+
+**Artifacts:**
+- `Sources/DSControls/DSToggle.swift` — Toggle switch control
+- `Sources/DSControls/DSCheckbox.swift` — Checkbox with intermediate state
+- `Sources/DSControls/DSControls.swift` — Updated module documentation
+- `Tests/DSControlsTests/DSControlsTests.swift` — 18 new tests (43 total in file, 321 total)
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` — iOS toggle showcase
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` — macOS toggle showcase
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` — watchOS toggle showcase
+
+**Key Design Decisions:**
+- DSToggle uses SwiftUI's native Toggle + `.tint()` for best platform behavior and accessibility
+- DSToggleSpec used for opacity (disabled state) and animation, not for custom rendering
+- DSCheckbox is a separate component with fully custom rendering (no native checkbox exists cross-platform)
+- Checkbox uses capabilities.supportsHover for hover effects — no #if os() in component code
+- Checkbox supports three states (DSCheckboxState) with intermediate for "select all" patterns
+- Bool binding convenience provided for simple two-state checkbox usage
+- Hover effects animate with theme's cardHover animation for smooth transitions
+- 321 total tests pass across all modules
+
+**Phase 4: Controls MVP — 2/6 steps complete**
+
+---
 
 ### Session 14 - 2026-02-05
 **Completed:**
