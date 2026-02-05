@@ -89,6 +89,17 @@ public enum DSThemeVariant: String, Sendable, Equatable, CaseIterable {
 /// - ``DSShadows``
 /// - ``DSMotion``
 ///
+/// ### Component Styles
+///
+/// - ``DSComponentStyles``
+/// - ``componentStyles``
+/// - ``resolveButton(variant:size:state:)``
+/// - ``resolveField(variant:state:validation:)``
+/// - ``resolveToggle(isOn:state:)``
+/// - ``resolveFormRow(layoutMode:capabilities:)``
+/// - ``resolveCard(elevation:)``
+/// - ``resolveListRow(style:state:capabilities:)``
+///
 /// ### Configuration
 ///
 /// - ``DSThemeVariant``
@@ -147,6 +158,20 @@ public struct DSTheme: Sendable, Equatable, DSThemeProtocol {
     /// Semantic animation roles.
     public let motion: DSMotion
     
+    /// Component style resolvers.
+    ///
+    /// The registry of spec resolvers for each component type.
+    /// Override individual resolvers to customize component styling:
+    ///
+    /// ```swift
+    /// var styles = DSComponentStyles.default
+    /// styles.button = DSButtonStyleResolver(id: "custom") { theme, variant, size, state in
+    ///     // Custom button spec resolution
+    /// }
+    /// let theme = DSTheme(variant: .light, componentStyles: styles)
+    /// ```
+    public let componentStyles: DSComponentStyles
+    
     // MARK: - Initializers
     
     /// Creates a theme with all semantic categories.
@@ -160,6 +185,7 @@ public struct DSTheme: Sendable, Equatable, DSThemeProtocol {
     ///   - radii: Semantic radii
     ///   - shadows: Semantic shadows
     ///   - motion: Semantic motion
+    ///   - componentStyles: Component style resolvers (default: `.default`)
     public init(
         variant: DSThemeVariant,
         density: DSDensity,
@@ -168,7 +194,8 @@ public struct DSTheme: Sendable, Equatable, DSThemeProtocol {
         spacing: DSSpacing,
         radii: DSRadii,
         shadows: DSShadows,
-        motion: DSMotion
+        motion: DSMotion,
+        componentStyles: DSComponentStyles = .default
     ) {
         self.variant = variant
         self.density = density
@@ -178,6 +205,7 @@ public struct DSTheme: Sendable, Equatable, DSThemeProtocol {
         self.radii = radii
         self.shadows = shadows
         self.motion = motion
+        self.componentStyles = componentStyles
     }
     
     /// Creates a theme from tokens with variant and accessibility settings.
@@ -190,10 +218,12 @@ public struct DSTheme: Sendable, Equatable, DSThemeProtocol {
     ///   - variant: Theme variant (light/dark)
     ///   - density: UI density (default: `.regular`)
     ///   - reduceMotion: Whether to reduce animations (default: `false`)
+    ///   - componentStyles: Component style resolvers (default: `.default`)
     public init(
         variant: DSThemeVariant,
         density: DSDensity = .regular,
-        reduceMotion: Bool = false
+        reduceMotion: Bool = false,
+        componentStyles: DSComponentStyles = .default
     ) {
         self.variant = variant
         self.density = density
@@ -217,6 +247,9 @@ public struct DSTheme: Sendable, Equatable, DSThemeProtocol {
         
         // Resolve motion with accessibility
         self.motion = reduceMotion ? .reducedMotion : .standard
+        
+        // Component style resolvers
+        self.componentStyles = componentStyles
     }
     
     /// Creates a theme from tokens with full accessibility support.
@@ -229,10 +262,12 @@ public struct DSTheme: Sendable, Equatable, DSThemeProtocol {
     ///   - variant: Theme variant (light/dark)
     ///   - accessibility: Accessibility settings to apply
     ///   - density: UI density (default: `.regular`)
+    ///   - componentStyles: Component style resolvers (default: `.default`)
     public init(
         variant: DSThemeVariant,
         accessibility: DSAccessibilityPolicy,
-        density: DSDensity = .regular
+        density: DSDensity = .regular,
+        componentStyles: DSComponentStyles = .default
     ) {
         let resolved = DSThemeResolver.resolve(
             variant: variant,
@@ -248,22 +283,29 @@ public struct DSTheme: Sendable, Equatable, DSThemeProtocol {
         self.radii = resolved.radii
         self.shadows = resolved.shadows
         self.motion = resolved.motion
+        self.componentStyles = componentStyles
     }
     
     /// Creates a theme from resolver input.
     ///
-    /// - Parameter input: The resolver input configuration.
-    public init(from input: DSThemeResolverInput) {
+    /// - Parameters:
+    ///   - input: The resolver input configuration.
+    ///   - componentStyles: Component style resolvers (default: `.default`)
+    public init(
+        from input: DSThemeResolverInput,
+        componentStyles: DSComponentStyles = .default
+    ) {
         self.init(
             variant: input.variant,
             accessibility: input.accessibility,
-            density: input.density
+            density: input.density,
+            componentStyles: componentStyles
         )
     }
     
     /// Creates a default light theme.
     public init() {
-        self.init(variant: .light)
+        self.init(variant: .light, componentStyles: .default)
     }
     
     // MARK: - Factory Methods
@@ -340,6 +382,110 @@ public struct DSTheme: Sendable, Equatable, DSThemeProtocol {
             accessibility: accessibility,
             density: density
         )
+    }
+}
+
+// MARK: - Spec Resolution Convenience
+
+extension DSTheme {
+    
+    /// Resolves a button spec using this theme's component styles.
+    ///
+    /// This is a convenience wrapper around
+    /// `componentStyles.button.resolve(theme:variant:size:state:)`.
+    ///
+    /// - Parameters:
+    ///   - variant: Button variant.
+    ///   - size: Button size.
+    ///   - state: Current interaction state.
+    /// - Returns: A fully resolved ``DSButtonSpec``.
+    public func resolveButton(
+        variant: DSButtonVariant,
+        size: DSButtonSize,
+        state: DSControlState
+    ) -> DSButtonSpec {
+        componentStyles.button.resolve(theme: self, variant: variant, size: size, state: state)
+    }
+    
+    /// Resolves a field spec using this theme's component styles.
+    ///
+    /// This is a convenience wrapper around
+    /// `componentStyles.field.resolve(theme:variant:state:validation:)`.
+    ///
+    /// - Parameters:
+    ///   - variant: Field variant.
+    ///   - state: Current interaction state.
+    ///   - validation: Current validation state.
+    /// - Returns: A fully resolved ``DSFieldSpec``.
+    public func resolveField(
+        variant: DSFieldVariant,
+        state: DSControlState,
+        validation: DSValidationState = .none
+    ) -> DSFieldSpec {
+        componentStyles.field.resolve(theme: self, variant: variant, state: state, validation: validation)
+    }
+    
+    /// Resolves a toggle spec using this theme's component styles.
+    ///
+    /// This is a convenience wrapper around
+    /// `componentStyles.toggle.resolve(theme:isOn:state:)`.
+    ///
+    /// - Parameters:
+    ///   - isOn: Whether the toggle is on.
+    ///   - state: Current interaction state.
+    /// - Returns: A fully resolved ``DSToggleSpec``.
+    public func resolveToggle(
+        isOn: Bool,
+        state: DSControlState
+    ) -> DSToggleSpec {
+        componentStyles.toggle.resolve(theme: self, isOn: isOn, state: state)
+    }
+    
+    /// Resolves a form row spec using this theme's component styles.
+    ///
+    /// This is a convenience wrapper around
+    /// `componentStyles.formRow.resolve(theme:layoutMode:capabilities:)`.
+    ///
+    /// - Parameters:
+    ///   - layoutMode: Layout mode (auto or fixed).
+    ///   - capabilities: Platform capabilities.
+    /// - Returns: A fully resolved ``DSFormRowSpec``.
+    public func resolveFormRow(
+        layoutMode: DSFormRowLayoutMode = .auto,
+        capabilities: DSCapabilities
+    ) -> DSFormRowSpec {
+        componentStyles.formRow.resolve(theme: self, layoutMode: layoutMode, capabilities: capabilities)
+    }
+    
+    /// Resolves a card spec using this theme's component styles.
+    ///
+    /// This is a convenience wrapper around
+    /// `componentStyles.card.resolve(theme:elevation:)`.
+    ///
+    /// - Parameter elevation: Card elevation level.
+    /// - Returns: A fully resolved ``DSCardSpec``.
+    public func resolveCard(
+        elevation: DSCardElevation
+    ) -> DSCardSpec {
+        componentStyles.card.resolve(theme: self, elevation: elevation)
+    }
+    
+    /// Resolves a list row spec using this theme's component styles.
+    ///
+    /// This is a convenience wrapper around
+    /// `componentStyles.listRow.resolve(theme:style:state:capabilities:)`.
+    ///
+    /// - Parameters:
+    ///   - style: Row visual style.
+    ///   - state: Current interaction state.
+    ///   - capabilities: Platform capabilities.
+    /// - Returns: A fully resolved ``DSListRowSpec``.
+    public func resolveListRow(
+        style: DSListRowStyle,
+        state: DSControlState,
+        capabilities: DSCapabilities
+    ) -> DSListRowSpec {
+        componentStyles.listRow.resolve(theme: self, style: style, state: state, capabilities: capabilities)
     }
 }
 

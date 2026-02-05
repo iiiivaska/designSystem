@@ -17,9 +17,9 @@
 
 ## Current Status
 
-**Phase:** 2 - Theme Resolution and Capabilities  
-**Current Step:** 9 - DSStyles Default Implementations  
-**Progress:** 8 / 39 steps completed  
+**Phase:** 2 - Theme Resolution and Capabilities (Complete)  
+**Current Step:** 9 - DSStyles Default Implementations (Done)  
+**Progress:** 9 / 39 steps completed  
 
 ---
 
@@ -32,11 +32,11 @@
 - [x] Step 4: DSTokens Implementation
 - [x] Step 5: DSTheme Container
 
-### Phase 2: Theme Resolution and Capabilities (2/4)
+### Phase 2: Theme Resolution and Capabilities (4/4) ✓
 - [x] Step 6: DSCapabilities System
 - [x] Step 7: ThemeResolver Implementation
 - [x] Step 8: DSStyles Spec Protocols
-- [ ] Step 9: DSStyles Default Implementations
+- [x] Step 9: DSStyles Default Implementations
 
 ### Phase 3: Primitives (0/4)
 - [ ] Step 10: DSText Primitive
@@ -85,6 +85,69 @@
 ---
 
 ## Session Log
+
+### Session 10 - 2026-02-05
+**Completed:**
+- Step 9: DSStyles Default Implementations
+  - Created `Sources/DSTheme/DSComponentStyles.swift` - Component styles registry:
+    - `DSComponentStyles` struct - central registry holding all spec resolvers
+    - `DSButtonStyleResolver` - closure-wrapped resolver for button specs
+    - `DSFieldStyleResolver` - closure-wrapped resolver for field specs
+    - `DSToggleStyleResolver` - closure-wrapped resolver for toggle specs
+    - `DSFormRowStyleResolver` - closure-wrapped resolver for form row specs
+    - `DSCardStyleResolver` - closure-wrapped resolver for card specs
+    - `DSListRowStyleResolver` - closure-wrapped resolver for list row specs
+    - Each resolver has: `id` (for equality), closure, `.default` preset
+    - Equatable via ID comparison (`@unchecked Sendable` for closure storage)
+  - Updated `Sources/DSTheme/DSTheme.swift`:
+    - Added `componentStyles: DSComponentStyles` stored property
+    - Updated all initializers with `componentStyles` parameter (defaults to `.default`)
+    - Added convenience resolve methods:
+      - `resolveButton(variant:size:state:)` → `DSButtonSpec`
+      - `resolveField(variant:state:validation:)` → `DSFieldSpec`
+      - `resolveToggle(isOn:state:)` → `DSToggleSpec`
+      - `resolveFormRow(layoutMode:capabilities:)` → `DSFormRowSpec`
+      - `resolveCard(elevation:)` → `DSCardSpec`
+      - `resolveListRow(style:state:capabilities:)` → `DSListRowSpec`
+    - Updated DocC Topics section to list component styles
+  - Created comprehensive unit tests (31 tests in 8 suites):
+    - `DSComponentStylesTests` - 5 tests (registry default, equatable, custom resolver, init)
+    - `DSButtonStyleResolverTests` - 4 tests (default matches static, custom resolver, equality, all variants)
+    - `DSFieldStyleResolverTests` - 3 tests (default matches, custom resolver, equality)
+    - `DSToggleStyleResolverTests` - 2 tests (default matches, on/off states)
+    - `DSFormRowStyleResolverTests` - 2 tests (default matches, auto-degradation)
+    - `DSCardStyleResolverTests` - 2 tests (default matches all elevations, custom no-shadow)
+    - `DSListRowStyleResolverTests` - 1 test (default matches all styles)
+    - `DSThemeComponentStylesIntegrationTests` - 12 tests (theme defaults, custom styles, convenience methods, equality, accessibility retention)
+  - Updated Showcase apps for all platforms:
+    - iOS: Full configuration UI with toggleable custom resolvers (pill buttons, accent-bordered cards), resolver ID display, live preview, convenience methods demo
+    - macOS: Two-column layout with configuration sidebar, live preview (buttons, cards), convenience methods table
+    - watchOS: Compact view showing resolver IDs, resolved values, and button preview
+    - Added "Component Styles" item to ShowcaseCore theme category
+
+**Artifacts:**
+- `Sources/DSTheme/DSComponentStyles.swift` - Registry with 6 resolver types
+- `Sources/DSTheme/DSTheme.swift` - Updated with componentStyles property and convenience methods
+- `Tests/DSThemeTests/DSComponentStylesTests.swift` - 31 unit tests
+- `Showcase/ShowcaseCore/ShowcaseCore.swift` - Added componentstyles item
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` - ComponentStylesShowcaseView
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` - ComponentStylesShowcasemacOSView
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` - ComponentStylesShowcasewatchOSView
+
+**Key Design Decisions:**
+- Resolvers use closure wrapping with `@unchecked Sendable` for function storage
+- Equality is ID-based (string comparison) since closures can't be compared
+- Default resolvers delegate to existing static `DSSpec.resolve(…)` methods
+- DSTheme gets convenience `resolve*()` methods that proxy to componentStyles
+- All existing initializers get `componentStyles` with default parameter (backward-compatible)
+- Custom resolvers can compose: resolve default spec, then modify specific values
+- 279 total tests pass (248 existing + 31 new)
+
+**Next Session:**
+- Continue with Phase 3: Primitives
+- Step 10: DSText Primitive
+
+---
 
 ### Session 9 - 2026-02-05
 **Completed:**
