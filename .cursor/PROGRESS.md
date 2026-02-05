@@ -18,8 +18,8 @@
 ## Current Status
 
 **Phase:** 4 - Controls MVP (In Progress)  
-**Current Step:** 17 - DSPicker Control (Done)  
-**Progress:** 17 / 39 steps completed  
+**Current Step:** 18 - DSStepper Control (Done)  
+**Progress:** 18 / 39 steps completed  
 
 ---
 
@@ -44,12 +44,12 @@
 - [x] Step 12: DSSurface and DSCard Primitives
 - [x] Step 13: DSLoader Primitive
 
-### Phase 4: Controls MVP (4/6)
+### Phase 4: Controls MVP (5/6)
 - [x] Step 14: DSButton Control
 - [x] Step 15: DSToggle Control
 - [x] Step 16: DSTextField Control
 - [x] Step 17: DSPicker Control
-- [ ] Step 18: DSStepper Control
+- [x] Step 18: DSStepper Control
 - [ ] Step 19: DSSlider Control (optional)
 
 ### Phase 5: Forms MVP (0/5)
@@ -85,6 +85,63 @@
 ---
 
 ## Session Log
+
+### Session 18 - 2026-02-06
+**Completed:**
+- Step 18: DSStepper Control — Numeric stepper with increment/decrement buttons
+  - Created `Sources/DSControls/DSStepper.swift` — Main stepper controls:
+    - `DSStepperSize` enum: small (32pt), medium (40pt), large (48pt)
+      - `height`, `buttonSize`, `iconSize`, `cornerRadius`, `valueFont`, `valueMinWidth` computed properties
+    - `DSStepper<V: Strideable & BinaryFloatingPoint>` generic view for floating-point values:
+      - `value: Binding<V>` binding for stepper value
+      - `range: ClosedRange<V>` for min/max bounds
+      - `step: V` for increment/decrement amount (default: 1)
+      - `size: DSStepperSize` for control sizing (default: .medium)
+      - `isDisabled: Bool` for disabled state
+      - Optional `formatStyle: FloatingPointFormatStyle<V>` for value display formatting
+      - Both `LocalizedStringKey` and `StringProtocol` initializers
+    - `DSIntStepper` convenience wrapper for integer values:
+      - Same API as `DSStepper` but with `Int` value type
+      - Simplified integer display (no decimal formatting)
+    - Increment/decrement buttons using `DSIconToken.Action.plus/minus` icons
+    - Buttons disable at bounds (decrement at min, increment at max)
+    - Pressed state with accent-colored background highlight
+    - Value display centered between buttons with monospaced font
+    - Stepper chrome: rounded rectangle background + subtle border
+    - Animation using `theme.motion.component.buttonPress`
+    - Accessibility:
+      - Combined accessibility element with label and value
+      - Adjustable actions for VoiceOver (swipe up/down to change value)
+      - Proper announcements for current value
+    - 16 previews: basic, sizes, bounds, custom step, disabled, without label, floating point, all states (light + dark)
+  - Updated `Sources/DSControls/DSControls.swift`:
+    - Added `DSStepper`, `DSIntStepper`, `DSStepperSize` to Topics section
+    - Updated Available Controls table
+  - Updated Showcase for all platforms:
+    - iOS: `DSStepperShowcaseView` — basic integer stepper, sizes, bounds behavior, custom step (5), disabled, floating point, custom layout (without label)
+    - macOS: `DSStepperShowcasemacOSView` — two-column layout with GroupBox sections, all features demonstrated
+    - watchOS: `DSStepperShowcasewatchOSView` — compact layout with basic, sizes, bounds, step, disabled, decimal steppers
+    - All three platforms route `"dsstepper"` item to their respective showcase views
+
+**Artifacts:**
+- `Sources/DSControls/DSStepper.swift` — Numeric stepper control with DSStepper (floating-point) and DSIntStepper (integer)
+- `Sources/DSControls/DSControls.swift` — Updated module documentation
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` — iOS stepper showcase
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` — macOS stepper showcase
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` — watchOS stepper showcase
+
+**Key Design Decisions:**
+- Two stepper types: `DSStepper<V>` for generic floating-point and `DSIntStepper` for integer convenience
+- Buttons use `DSIconToken.Action.plus/minus` for consistent icon usage across design system
+- Buttons disable automatically at min/max bounds — visual feedback for value limits
+- Value display uses monospaced font for stable layout when numbers change
+- Pressed state uses accent color highlight (15% opacity) for feedback
+- No spec needed — stepper uses simple styling from theme tokens directly
+- Full accessibility support with adjustable trait for VoiceOver increment/decrement
+
+**Phase 4: Controls MVP — 5/6 steps complete**
+
+---
 
 ### Session 17 - 2026-02-06
 **Completed:**

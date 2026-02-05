@@ -33,6 +33,8 @@ import DSPrimitives
 /// | ``DSMultilineField`` | Multiline text editor with character count |
 /// | ``DSFieldChrome`` | Field wrapper with label, helper, validation |
 /// | ``DSPicker`` | Platform-adaptive selection picker |
+/// | ``DSStepper`` | Numeric stepper for floating-point values |
+/// | ``DSIntStepper`` | Numeric stepper for integer values |
 ///
 /// ## Topics
 ///
@@ -58,6 +60,12 @@ import DSPrimitives
 ///
 /// - ``DSPicker``
 /// - ``DSPickerMode``
+///
+/// ### Steppers
+///
+/// - ``DSStepper``
+/// - ``DSIntStepper``
+/// - ``DSStepperSize``
 public enum DSControls {
     /// Current version of the controls module
     public static let version = "0.1.0"
