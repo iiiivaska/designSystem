@@ -18,8 +18,8 @@
 ## Current Status
 
 **Phase:** 4 - Controls MVP (In Progress)  
-**Current Step:** 15 - DSToggle Control (Done)  
-**Progress:** 15 / 39 steps completed  
+**Current Step:** 16 - DSTextField Control (Done)  
+**Progress:** 16 / 39 steps completed  
 
 ---
 
@@ -44,10 +44,10 @@
 - [x] Step 12: DSSurface and DSCard Primitives
 - [x] Step 13: DSLoader Primitive
 
-### Phase 4: Controls MVP (2/6)
+### Phase 4: Controls MVP (3/6)
 - [x] Step 14: DSButton Control
 - [x] Step 15: DSToggle Control
-- [ ] Step 16: DSTextField Control
+- [x] Step 16: DSTextField Control
 - [ ] Step 17: DSPicker Control
 - [ ] Step 18: DSStepper Control
 - [ ] Step 19: DSSlider Control (optional)
@@ -85,6 +85,107 @@
 ---
 
 ## Session Log
+
+### Session 16 - 2026-02-06
+**Completed:**
+- Step 16: DSTextField Control — Text input with validation chrome
+  - Created `Sources/DSControls/DSFieldChrome.swift` — Field chrome wrapper:
+    - `DSFieldChrome<Content>` generic view wrapping any field content
+    - Optional label text above the field with `.medium` weight
+    - Required marker (red asterisk) with "Required" accessibility label
+    - Optional helper text below the field in tertiary color
+    - Validation message display with severity icon + colored text (error/warning/success)
+    - Character count display with optional max limit (e.g., "42/100")
+    - Over-limit count highlighted in danger color
+    - Accessibility: validation messages combine icon + text for VoiceOver
+    - Both `LocalizedStringKey` and `StringProtocol` initializers
+  - Created `Sources/DSControls/DSTextField.swift` — Main text field control:
+    - `DSTextField` view with full resolve-then-render architecture via `DSFieldSpec`
+    - 2 variants: default (subtle border), search (rounded corners + search icon)
+    - States: normal, focused (accent border + focus ring), disabled (reduced opacity)
+    - Validation states: error (red border), warning (yellow border), success (green border)
+    - `@FocusState` integration for automatic focus tracking
+    - Clear button appears when focused and has text
+    - Validation indicator icon in trailing position
+    - Focus ring displayed via capabilities check (macOS focus ring support)
+    - Tap-to-focus on the entire field area
+    - Field chrome wraps the input with label, helper text, character limit
+    - Both `LocalizedStringKey` and `StringProtocol` initializers
+    - Comprehensive previews: default, search, validation states, required+helper+count (light + dark)
+  - Created `Sources/DSControls/DSSecureField.swift` — Secure/password field:
+    - `DSSecureField` wrapping SwiftUI's `SecureField` with theme styling
+    - Toggleable password visibility (eye open/closed icon)
+    - Switches between `TextField` and `SecureField` for reveal/hide
+    - Visibility toggle appears only when field has text
+    - Full validation, focus, disabled state support via `DSFieldSpec`
+    - Field chrome with label, helper text, required marker
+    - Both `LocalizedStringKey` and `StringProtocol` initializers
+    - Comprehensive previews: states, validation, disabled (light + dark)
+  - Created `Sources/DSControls/DSMultilineField.swift` — Multiline text editor:
+    - `DSMultilineField` wrapping SwiftUI's `TextEditor` with theme styling
+    - Configurable `minHeight` (default 80pt)
+    - Placeholder text overlay when empty
+    - Character count + limit display via field chrome
+    - Hidden scroll background (`.scrollContentBackground(.hidden)`)
+    - Adjusted padding to compensate TextEditor's built-in insets
+    - Full validation, focus, disabled state support via `DSFieldSpec`
+    - Both `LocalizedStringKey` and `StringProtocol` initializers
+    - Comprehensive previews: empty, filled, validation, disabled (light + dark)
+  - Updated `Sources/DSControls/DSControls.swift` — Module documentation:
+    - Added DSTextField, DSSecureField, DSMultilineField, DSFieldChrome to Topics section
+    - Updated Available Controls table
+  - Added 18 unit tests in `Tests/DSControlsTests/DSControlsTests.swift`:
+    - `DSFieldSpecResolutionTests` (18 tests):
+      - Default variant corner radius test
+      - Search variant corner radius test (larger radius)
+      - Normal state border color + opacity test
+      - Focused state accent border + focus ring test
+      - Disabled state opacity (0.6) + disabled foreground test
+      - Error validation danger border test
+      - Warning validation warning border test
+      - Success validation success border test
+      - Error priority over focus test
+      - Focused error wider border than unfocused error test
+      - Text typography matches theme fieldText test
+      - Placeholder typography matches theme fieldPlaceholder test
+      - Field height 40pt test
+      - Field padding positive values test
+      - Animation presence test
+      - Dark theme different background test
+      - Theme convenience method test
+      - All combinations matrix test (2 variants × 3 states × 5 validations)
+  - Updated Showcase for all platforms:
+    - iOS: `DSTextFieldShowcaseView` — basic fields (empty, filled, disabled, required), search variant, interactive email validation, warning/success states, secure field with confirm match, multiline with character limit, spec details
+    - macOS: `DSTextFieldShowcasemacOSView` — two-column layout with text fields + secure on left, validation + multiline + spec details on right
+    - watchOS: `DSTextFieldShowcasewatchOSView` — compact layout with all field types, validation states, secure field, multiline, spec info
+    - All three platforms route `"dstextfield"` item to their respective showcase views
+
+**Artifacts:**
+- `Sources/DSControls/DSFieldChrome.swift` — Field chrome wrapper (label, helper, validation, count)
+- `Sources/DSControls/DSTextField.swift` — Main text field control
+- `Sources/DSControls/DSSecureField.swift` — Secure/password field with visibility toggle
+- `Sources/DSControls/DSMultilineField.swift` — Multiline text editor
+- `Sources/DSControls/DSControls.swift` — Updated module documentation
+- `Tests/DSControlsTests/DSControlsTests.swift` — 18 new tests (61 total in file, 339 total)
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` — iOS text field showcase
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` — macOS text field showcase
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` — watchOS text field showcase
+
+**Key Design Decisions:**
+- DSTextField uses `@FocusState` for automatic focus tracking — no manual state management needed
+- Clear button and validation icon appear contextually (clear when focused+hasText, validation when unfocused)
+- DSSecureField toggles between TextField and SecureField for password visibility
+- DSMultilineField uses TextEditor with compensated padding and overlay placeholder
+- DSFieldChrome is a reusable generic wrapper — used by all three field types
+- Focus ring displayed conditionally via `capabilities.supportsFocusRing` — no #if os() in components
+- All fields use `.textFieldStyle(.plain)` to override platform-specific styling
+- All fields support both `LocalizedStringKey` and `StringProtocol` initializers for ergonomics
+- Validation border priority: error > warning > focus > default (from DSFieldSpec)
+- 339 total tests pass across all modules
+
+**Phase 4: Controls MVP — 3/6 steps complete**
+
+---
 
 ### Session 15 - 2026-02-06
 **Completed:**

@@ -466,6 +466,255 @@ struct DSToggleSpecResolutionTests {
     }
 }
 
+// MARK: - DSField Spec Resolution Tests
+
+@Suite("DSField Spec Resolution")
+struct DSFieldSpecResolutionTests {
+    
+    let lightTheme = DSTheme.light
+    let darkTheme = DSTheme.dark
+    
+    // MARK: - Variants
+    
+    @Test("Default variant uses field corner radius")
+    func testDefaultVariantRadius() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal
+        )
+        #expect(spec.cornerRadius == lightTheme.radii.component.field)
+    }
+    
+    @Test("Search variant uses search field corner radius")
+    func testSearchVariantRadius() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .search,
+            state: .normal
+        )
+        #expect(spec.cornerRadius == lightTheme.radii.component.searchField)
+        #expect(spec.cornerRadius > lightTheme.radii.component.field)
+    }
+    
+    // MARK: - States
+    
+    @Test("Normal state has subtle border")
+    func testNormalState() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal
+        )
+        #expect(spec.borderColor == lightTheme.colors.border.subtle)
+        #expect(spec.opacity == 1.0)
+        #expect(spec.focusRingWidth == 0)
+    }
+    
+    @Test("Focused state has accent border and focus ring")
+    func testFocusedState() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .focused
+        )
+        #expect(spec.borderColor == lightTheme.colors.accent.primary)
+        #expect(spec.borderWidth == 2.0)
+        #expect(spec.focusRingColor == lightTheme.colors.focusRing)
+        #expect(spec.focusRingWidth > 0)
+    }
+    
+    @Test("Disabled state reduces opacity")
+    func testDisabledState() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .disabled
+        )
+        #expect(spec.opacity == 0.6)
+        #expect(spec.foregroundColor == lightTheme.colors.fg.disabled)
+    }
+    
+    // MARK: - Validation
+    
+    @Test("Error validation shows danger border")
+    func testErrorValidation() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal,
+            validation: .error(message: "Error")
+        )
+        #expect(spec.borderColor == lightTheme.colors.state.danger)
+        #expect(spec.borderWidth == 1.5)
+    }
+    
+    @Test("Warning validation shows warning border")
+    func testWarningValidation() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal,
+            validation: .warning(message: "Warning")
+        )
+        #expect(spec.borderColor == lightTheme.colors.state.warning)
+        #expect(spec.borderWidth == 1.5)
+    }
+    
+    @Test("Success validation shows success border")
+    func testSuccessValidation() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal,
+            validation: .success(message: "Valid")
+        )
+        #expect(spec.borderColor == lightTheme.colors.state.success)
+    }
+    
+    @Test("Error validation takes priority over focus")
+    func testErrorPriorityOverFocus() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .focused,
+            validation: .error(message: "Error")
+        )
+        #expect(spec.borderColor == lightTheme.colors.state.danger)
+        #expect(spec.borderWidth == 2.0) // Focused + error = 2.0
+    }
+    
+    @Test("Focused error has wider border than unfocused error")
+    func testFocusedErrorBorderWidth() {
+        let unfocusedError = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal,
+            validation: .error(message: "Error")
+        )
+        let focusedError = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .focused,
+            validation: .error(message: "Error")
+        )
+        #expect(focusedError.borderWidth > unfocusedError.borderWidth)
+    }
+    
+    // MARK: - Typography
+    
+    @Test("Text typography matches theme field text")
+    func testTextTypography() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal
+        )
+        #expect(spec.textTypography.size == lightTheme.typography.component.fieldText.size)
+        #expect(spec.textTypography.weight == lightTheme.typography.component.fieldText.weight)
+    }
+    
+    @Test("Placeholder typography matches theme placeholder")
+    func testPlaceholderTypography() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal
+        )
+        #expect(spec.placeholderTypography.size == lightTheme.typography.component.fieldPlaceholder.size)
+    }
+    
+    // MARK: - Sizing
+    
+    @Test("Field height is 40pt")
+    func testFieldHeight() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal
+        )
+        #expect(spec.height == 40)
+    }
+    
+    @Test("Field has horizontal and vertical padding")
+    func testFieldPadding() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal
+        )
+        #expect(spec.horizontalPadding > 0)
+        #expect(spec.verticalPadding > 0)
+    }
+    
+    // MARK: - Animation
+    
+    @Test("Field spec has animation")
+    func testAnimation() {
+        let spec = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal
+        )
+        #expect(spec.animation != nil)
+    }
+    
+    // MARK: - Dark Theme
+    
+    @Test("Dark theme resolves different background")
+    func testDarkThemeBackground() {
+        let lightSpec = DSFieldSpec.resolve(theme: lightTheme, variant: .default, state: .normal)
+        let darkSpec = DSFieldSpec.resolve(theme: darkTheme, variant: .default, state: .normal)
+        #expect(lightSpec.backgroundColor != darkSpec.backgroundColor)
+    }
+    
+    // MARK: - Theme Convenience
+    
+    @Test("Theme resolveField convenience method works")
+    func testThemeResolveField() {
+        let direct = DSFieldSpec.resolve(
+            theme: lightTheme,
+            variant: .default,
+            state: .normal
+        )
+        let convenience = lightTheme.resolveField(
+            variant: .default,
+            state: .normal
+        )
+        #expect(direct.height == convenience.height)
+        #expect(direct.cornerRadius == convenience.cornerRadius)
+        #expect(direct.opacity == convenience.opacity)
+        #expect(direct.borderWidth == convenience.borderWidth)
+    }
+    
+    // MARK: - All Combinations
+    
+    @Test("All variant-state-validation combinations resolve without errors")
+    func testAllCombinations() {
+        let variants = DSFieldVariant.allCases
+        let states: [DSControlState] = [.normal, .focused, .disabled]
+        let validations: [DSValidationState] = [.none, .error(message: "Err"), .warning(message: "Warn"), .success(message: "OK"), .validating]
+        
+        for variant in variants {
+            for state in states {
+                for validation in validations {
+                    let spec = DSFieldSpec.resolve(
+                        theme: lightTheme,
+                        variant: variant,
+                        state: state,
+                        validation: validation
+                    )
+                    #expect(spec.height > 0)
+                    #expect(spec.cornerRadius >= 0)
+                    #expect(spec.opacity > 0)
+                    #expect(spec.opacity <= 1.0)
+                    #expect(spec.borderWidth >= 0)
+                }
+            }
+        }
+    }
+}
+
 // MARK: - DSCheckboxState Tests
 
 @Suite("DSCheckboxState")
