@@ -8,6 +8,7 @@
 import DSControls
 import DSCore
 import SwiftUI
+import DSTheme
 
 // MARK: - DSTextField Showcase
 
