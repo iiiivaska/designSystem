@@ -17,9 +17,9 @@
 
 ## Current Status
 
-**Phase:** 2 - Theme Resolution and Capabilities (Complete)  
-**Current Step:** 9 - DSStyles Default Implementations (Done)  
-**Progress:** 9 / 39 steps completed  
+**Phase:** 3 - Primitives (In Progress)  
+**Current Step:** 11 - DSIcon Primitive (Done)  
+**Progress:** 11 / 39 steps completed  
 
 ---
 
@@ -38,9 +38,9 @@
 - [x] Step 8: DSStyles Spec Protocols
 - [x] Step 9: DSStyles Default Implementations
 
-### Phase 3: Primitives (0/4)
-- [ ] Step 10: DSText Primitive
-- [ ] Step 11: DSIcon Primitive
+### Phase 3: Primitives (2/4)
+- [x] Step 10: DSText Primitive
+- [x] Step 11: DSIcon Primitive
 - [ ] Step 12: DSSurface and DSCard Primitives
 - [ ] Step 13: DSLoader Primitive
 
@@ -85,6 +85,81 @@
 ---
 
 ## Session Log
+
+### Session 11 - 2026-02-05
+**Completed:**
+- Step 10: DSText Primitive - Role-based text component
+  - Created `Sources/DSPrimitives/DSTextRole.swift` - All typography roles enum:
+    - 11 system roles: largeTitle, title1-3, headline, body, callout, subheadline, footnote, caption1-2
+    - 9 component roles: buttonLabel, fieldText, fieldPlaceholder, helperText, rowTitle, rowValue, sectionHeader, badgeText, monoText
+    - `resolve(from:)` method maps role → `DSTextStyle` from theme
+    - `displayName`, `isSystemRole`, `isComponentRole` computed properties
+    - Static `systemRoles` and `componentRoles` arrays
+    - CaseIterable + Identifiable conformance
+  - Created `Sources/DSPrimitives/DSText.swift` - Role-based text view:
+    - Init with `LocalizedStringKey`, `String`, or `StringProtocol` + role
+    - Resolves font/color/weight/letterSpacing from theme typography via role
+    - `dsTextColor(_:)` modifier for color override
+    - `dsTextWeight(_:)` modifier for weight override
+    - Accessibility: title roles get `.isHeader` trait
+    - Dynamic Type supported through theme typography
+    - Previews for all platforms and color schemes
+
+- Step 11: DSIcon Primitive - SF Symbols wrapper
+  - Created `Sources/DSPrimitives/DSIconSize.swift` - Icon size enum:
+    - small(16pt), medium(20pt), large(24pt), xl(32pt)
+    - `points` and `font` computed properties
+  - Created `Sources/DSPrimitives/DSIconColor.swift` (in DSIcon.swift) - Icon color mode:
+    - Semantic colors: primary, secondary, tertiary, disabled, accent, success, warning, danger, info
+    - `custom(Color)` for arbitrary color
+    - `resolve(from:)` maps to theme colors
+  - Created `Sources/DSPrimitives/DSIcon.swift` - SF Symbols wrapper:
+    - Init with symbol name, size, color
+    - Renders `Image(systemName:)` with theme-resolved color and sized font
+    - Fixed frame matching icon size for consistent layout
+    - `dsIconAccessibilityLabel(_:)` for custom VoiceOver label
+    - `dsIconAccessibilityHidden()` for decorative icons
+    - Auto-derived accessibility label from symbol name
+    - Previews for sizes, colors, tokens, all color schemes
+  - Created `Sources/DSPrimitives/DSIconToken.swift` - SF Symbol name constants:
+    - `Navigation`: chevronRight/Left/Down/Up, arrowRight/Left, externalLink
+    - `Action`: plus, minus, close, edit, delete, share, copy, search, refresh, settings, more
+    - `State`: checkmark, checkmarkCircle, warning, error, info, loading, empty
+    - `Form`: required, toggleOn/Off, clear, eyeOpen/Closed, dropdown, calendar
+    - `General`: star, heart, person, lock, bell, photo, document, folder, link
+  - Updated `Sources/DSPrimitives/DSPrimitives.swift` with module documentation
+  - Updated Showcase apps for all platforms:
+    - iOS: Full DSText showcase (system/component roles, color/weight overrides) + Full DSIcon showcase (sizes, colors, icon tokens, inline with text)
+    - macOS: Two-column layouts for both DSText and DSIcon with configuration controls
+    - watchOS: Compact views showing key roles/sizes/colors/tokens
+    - Added routing cases for "dstext" and "dsicon" in all platform Showcase views
+
+**Artifacts:**
+- `Sources/DSPrimitives/DSText.swift` - Role-based text component
+- `Sources/DSPrimitives/DSTextRole.swift` - Typography roles enum (20 roles)
+- `Sources/DSPrimitives/DSIcon.swift` - SF Symbols wrapper + DSIconColor enum
+- `Sources/DSPrimitives/DSIconSize.swift` - Icon size variants
+- `Sources/DSPrimitives/DSIconToken.swift` - Common SF Symbol name constants
+- `Sources/DSPrimitives/DSPrimitives.swift` - Updated module documentation
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` - DSTextShowcaseView + DSIconShowcaseView
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` - DSTextShowcasemacOSView + DSIconShowcasemacOSView
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` - DSTextShowcasewatchOSView + DSIconShowcasewatchOSView
+
+**Key Design Decisions:**
+- DSText uses role enum rather than direct text style to keep API simple
+- DSTextRole.resolve(from:) centralizes theme lookup for all 20 roles
+- DSText supports color and weight overrides while keeping role's base styling
+- DSIcon uses DSIconColor enum (not raw Color) for semantic color resolution
+- DSIconToken provides organized SF Symbol name constants to avoid string typos
+- SF Symbols only (no custom icon assets) per v0 requirements
+- Accessibility: title roles get isHeader trait, icons get auto-derived labels
+- All 279 existing tests continue to pass
+
+**Next Session:**
+- Continue with Phase 3: Primitives
+- Step 12: DSSurface and DSCard Primitives
+
+---
 
 ### Session 10 - 2026-02-05
 **Completed:**
