@@ -96,6 +96,7 @@ public enum DSThemeVariant: String, Sendable, Equatable, CaseIterable {
 /// - ``resolveButton(variant:size:state:)``
 /// - ``resolveField(variant:state:validation:)``
 /// - ``resolveToggle(isOn:state:)``
+/// - ``resolveSlider(state:)``
 /// - ``resolveFormRow(layoutMode:capabilities:)``
 /// - ``resolveCard(elevation:)``
 /// - ``resolveListRow(style:state:capabilities:)``
@@ -439,6 +440,19 @@ extension DSTheme {
         state: DSControlState
     ) -> DSToggleSpec {
         componentStyles.toggle.resolve(theme: self, isOn: isOn, state: state)
+    }
+    
+    /// Resolves a slider spec using this theme's component styles.
+    ///
+    /// This is a convenience wrapper around
+    /// `componentStyles.slider.resolve(theme:state:)`.
+    ///
+    /// - Parameter state: Current interaction state.
+    /// - Returns: A fully resolved ``DSSliderSpec``.
+    public func resolveSlider(
+        state: DSControlState
+    ) -> DSSliderSpec {
+        componentStyles.slider.resolve(theme: self, state: state)
     }
     
     /// Resolves a form row spec using this theme's component styles.

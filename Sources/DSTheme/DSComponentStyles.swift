@@ -72,6 +72,7 @@ import DSCore
 /// - ``button``
 /// - ``field``
 /// - ``toggle``
+/// - ``slider``
 /// - ``formRow``
 /// - ``card``
 /// - ``listRow``
@@ -98,6 +99,11 @@ public struct DSComponentStyles: Sendable, Equatable {
     /// Produces ``DSToggleSpec`` for a given on/off state and interaction state.
     public var toggle: DSToggleStyleResolver
     
+    /// Slider spec resolver.
+    ///
+    /// Produces ``DSSliderSpec`` for a given interaction state.
+    public var slider: DSSliderStyleResolver
+    
     /// Form row spec resolver.
     ///
     /// Produces ``DSFormRowSpec`` for a given layout mode and capabilities.
@@ -121,6 +127,7 @@ public struct DSComponentStyles: Sendable, Equatable {
     ///   - button: Button spec resolver.
     ///   - field: Field spec resolver.
     ///   - toggle: Toggle spec resolver.
+    ///   - slider: Slider spec resolver.
     ///   - formRow: Form row spec resolver.
     ///   - card: Card spec resolver.
     ///   - listRow: List row spec resolver.
@@ -128,6 +135,7 @@ public struct DSComponentStyles: Sendable, Equatable {
         button: DSButtonStyleResolver = .default,
         field: DSFieldStyleResolver = .default,
         toggle: DSToggleStyleResolver = .default,
+        slider: DSSliderStyleResolver = .default,
         formRow: DSFormRowStyleResolver = .default,
         card: DSCardStyleResolver = .default,
         listRow: DSListRowStyleResolver = .default
@@ -135,6 +143,7 @@ public struct DSComponentStyles: Sendable, Equatable {
         self.button = button
         self.field = field
         self.toggle = toggle
+        self.slider = slider
         self.formRow = formRow
         self.card = card
         self.listRow = listRow
@@ -377,6 +386,72 @@ public struct DSToggleStyleResolver: @unchecked Sendable, Equatable {
     /// Default resolver using ``DSToggleSpec/resolve(theme:isOn:state:)``.
     public static let `default` = DSToggleStyleResolver { theme, isOn, state in
         DSToggleSpec.resolve(theme: theme, isOn: isOn, state: state)
+    }
+}
+
+// MARK: - DSSliderStyleResolver
+
+/// Resolver that produces ``DSSliderSpec`` values from theme and parameters.
+///
+/// The resolver wraps a function that maps (theme, state)
+/// to a concrete ``DSSliderSpec``. Replace the default resolver to customize
+/// slider styling across your app.
+///
+/// ## Default Behavior
+///
+/// The ``default`` resolver delegates to ``DSSliderSpec/resolve(theme:state:)``.
+///
+/// ## Topics
+///
+/// ### Resolution
+///
+/// - ``resolve(theme:state:)``
+///
+/// ### Presets
+///
+/// - ``default``
+public struct DSSliderStyleResolver: @unchecked Sendable, Equatable {
+    
+    /// Resolver identifier for equality comparison.
+    public let id: String
+    
+    /// The resolve function.
+    private let _resolve: @Sendable (DSTheme, DSControlState) -> DSSliderSpec
+    
+    /// Creates a slider style resolver.
+    ///
+    /// - Parameters:
+    ///   - id: Identifier for this resolver (default: `"default"`).
+    ///   - resolve: The function that resolves a ``DSSliderSpec``.
+    public init(
+        id: String = "default",
+        resolve: @escaping @Sendable (DSTheme, DSControlState) -> DSSliderSpec
+    ) {
+        self.id = id
+        self._resolve = resolve
+    }
+    
+    /// Resolves a slider spec.
+    ///
+    /// - Parameters:
+    ///   - theme: The current theme.
+    ///   - state: Current interaction state.
+    /// - Returns: A fully resolved ``DSSliderSpec``.
+    public func resolve(
+        theme: DSTheme,
+        state: DSControlState
+    ) -> DSSliderSpec {
+        _resolve(theme, state)
+    }
+    
+    /// Equality based on resolver identifier.
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    /// Default resolver using ``DSSliderSpec/resolve(theme:state:)``.
+    public static let `default` = DSSliderStyleResolver { theme, state in
+        DSSliderSpec.resolve(theme: theme, state: state)
     }
 }
 

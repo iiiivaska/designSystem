@@ -35,6 +35,7 @@ import DSPrimitives
 /// | ``DSPicker`` | Platform-adaptive selection picker |
 /// | ``DSStepper`` | Numeric stepper for floating-point values |
 /// | ``DSIntStepper`` | Numeric stepper for integer values |
+/// | ``DSSlider`` | Range slider with watchOS fallback |
 ///
 /// ## Topics
 ///
@@ -66,6 +67,11 @@ import DSPrimitives
 /// - ``DSStepper``
 /// - ``DSIntStepper``
 /// - ``DSStepperSize``
+///
+/// ### Sliders
+///
+/// - ``DSSlider``
+/// - ``DSSliderMode``
 public enum DSControls {
     /// Current version of the controls module
     public static let version = "0.1.0"
