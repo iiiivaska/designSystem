@@ -17,9 +17,9 @@
 
 ## Current Status
 
-**Phase:** 3 - Primitives (Complete)  
-**Current Step:** 13 - DSLoader Primitive (Done)  
-**Progress:** 13 / 39 steps completed  
+**Phase:** 4 - Controls MVP (In Progress)  
+**Current Step:** 14 - DSButton Control (Done)  
+**Progress:** 14 / 39 steps completed  
 
 ---
 
@@ -44,8 +44,8 @@
 - [x] Step 12: DSSurface and DSCard Primitives
 - [x] Step 13: DSLoader Primitive
 
-### Phase 4: Controls MVP (0/6)
-- [ ] Step 14: DSButton Control
+### Phase 4: Controls MVP (1/6)
+- [x] Step 14: DSButton Control
 - [ ] Step 15: DSToggle Control
 - [ ] Step 16: DSTextField Control
 - [ ] Step 17: DSPicker Control
@@ -85,6 +85,56 @@
 ---
 
 ## Session Log
+
+### Session 14 - 2026-02-05
+**Completed:**
+- Step 14: DSButton Control — All variants and states
+  - Created `Sources/DSControls/DSButton.swift` — Main button view:
+    - `DSButton` view with full resolve-then-render architecture
+    - 4 variants: primary, secondary, tertiary, destructive
+    - 3 sizes: small (32pt), medium (40pt), large (48pt)
+    - States: normal, pressed (via ButtonStyle), disabled, loading
+    - Optional leading SF Symbol icon with size-appropriate font
+    - `fullWidth` mode for full-width CTA buttons
+    - Loading state shows `DSLoader` spinner with variant-appropriate color
+    - Disabled state prevents interaction and reduces opacity
+    - Both `LocalizedStringKey` and `StringProtocol` initializers
+    - Accessibility: button trait, disabled state announced automatically
+    - Comprehensive previews: variants, sizes, states, icons, full-width (light + dark)
+  - Created `Sources/DSControls/DSButtonStyle.swift` — SwiftUI ButtonStyle:
+    - `DSButtonStyleModifier` implements `ButtonStyle` protocol
+    - Detects pressed state via `configuration.isPressed`
+    - Combines pressed with disabled/loading into `DSControlState`
+    - Resolves `DSButtonSpec` from theme's `componentStyles.button` resolver
+    - Applies all spec values: bg, fg, border, shadow, opacity, scale, animation
+    - Animated transitions between states using spec animation
+    - `contentShape` for proper hit testing
+  - Updated `Tests/DSControlsTests/DSControlsTests.swift` — 25 tests:
+    - Variant color tests: primary/secondary/tertiary/destructive
+    - Size tests: height progression (32/40/48pt), consistent padding/radius
+    - State tests: disabled opacity (0.6), loading opacity (0.8), pressed scale (0.97)
+    - Shadow tests: primary has shadow, secondary/tertiary no shadow, pressed/disabled no shadow
+    - Typography tests: semibold weight, small size smaller font
+    - Dark theme comparison test
+    - Theme convenience method test
+    - Full matrix test: all variants × sizes × states resolve without errors
+  - Updated Showcase for all platforms:
+    - iOS: `DSButtonShowcaseView` — interactive config, all variants/sizes/states, icons, full-width
+    - macOS: `DSButtonShowcasemacOSView` — two-column layout with config panel and preview groups
+    - watchOS: `DSButtonShowcasewatchOSView` — compact layout with all key features
+    - All three platforms route `"dsbutton"` item to their respective showcase views
+
+**Artifacts:**
+- `Sources/DSControls/DSButton.swift` — Main button view component
+- `Sources/DSControls/DSButtonStyle.swift` — SwiftUI ButtonStyle implementation
+- `Tests/DSControlsTests/DSControlsTests.swift` — 25 unit tests (all passing)
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` — iOS button showcase
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` — macOS button showcase
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` — watchOS button showcase
+
+**Phase 4: Controls MVP — 1/6 steps complete**
+
+---
 
 ### Session 13 - 2026-02-05
 **Completed:**
