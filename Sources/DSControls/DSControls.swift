@@ -32,6 +32,7 @@ import DSPrimitives
 /// | ``DSSecureField`` | Secure/password input with visibility toggle |
 /// | ``DSMultilineField`` | Multiline text editor with character count |
 /// | ``DSFieldChrome`` | Field wrapper with label, helper, validation |
+/// | ``DSPicker`` | Platform-adaptive selection picker |
 ///
 /// ## Topics
 ///
@@ -52,6 +53,11 @@ import DSPrimitives
 /// - ``DSSecureField``
 /// - ``DSMultilineField``
 /// - ``DSFieldChrome``
+///
+/// ### Pickers
+///
+/// - ``DSPicker``
+/// - ``DSPickerMode``
 public enum DSControls {
     /// Current version of the controls module
     public static let version = "0.1.0"

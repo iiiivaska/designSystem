@@ -18,8 +18,8 @@
 ## Current Status
 
 **Phase:** 4 - Controls MVP (In Progress)  
-**Current Step:** 16 - DSTextField Control (Done)  
-**Progress:** 16 / 39 steps completed  
+**Current Step:** 17 - DSPicker Control (Done)  
+**Progress:** 17 / 39 steps completed  
 
 ---
 
@@ -44,11 +44,11 @@
 - [x] Step 12: DSSurface and DSCard Primitives
 - [x] Step 13: DSLoader Primitive
 
-### Phase 4: Controls MVP (3/6)
+### Phase 4: Controls MVP (4/6)
 - [x] Step 14: DSButton Control
 - [x] Step 15: DSToggle Control
 - [x] Step 16: DSTextField Control
-- [ ] Step 17: DSPicker Control
+- [x] Step 17: DSPicker Control
 - [ ] Step 18: DSStepper Control
 - [ ] Step 19: DSSlider Control (optional)
 
@@ -85,6 +85,55 @@
 ---
 
 ## Session Log
+
+### Session 17 - 2026-02-06
+**Completed:**
+- Step 17: DSPicker Control — Platform-adaptive picker with multiple presentation modes
+  - Created `Sources/DSControls/DSPicker.swift` — Main picker control:
+    - `DSPickerMode` enum: `.auto`, `.sheet`, `.popover`, `.menu`, `.navigation`
+    - `.auto` resolves via `DSCapabilities.preferredPickerPresentation`:
+      - iOS → sheet, macOS → menu, watchOS → navigation
+    - `DSPicker<SelectionValue, OptionLabel>` generic view:
+      - `SelectionValue: Hashable & Identifiable & Sendable` constraint
+      - `@ViewBuilder` label closure for option rendering
+      - `mode` parameter for explicit presentation override
+      - Optional leading SF Symbol `icon` on trigger
+      - `isDisabled` parameter with disabled opacity from field spec
+    - Menu presentation: SwiftUI `Menu` with checkmark on selected item
+    - Sheet presentation: `Button` trigger → `.sheet` with `DSPickerOptionsList`
+      - `.presentationDetents([.medium, .large])` + drag indicator
+    - Popover presentation: `Button` trigger → `.popover` with options list
+    - Navigation presentation: `NavigationLink` → options list
+    - Trigger content: title + selected value label + contextual chevron icon
+      - `chevron.up.chevron.down` for menu, `chevron.down` for sheet/popover, `chevron.right` for navigation
+      - Styled as field chrome (background, border, radius from `DSFieldSpec`)
+    - `DSPickerOptionsList` internal view:
+      - `NavigationStack` + `List` with selectable rows
+      - Checkmark indicator + subtle accent highlight on selected row
+      - "Done" toolbar button for sheet/popover dismissal (hidden on watchOS)
+    - Both `LocalizedStringKey` and `StringProtocol` initializers
+    - 14 previews: menu/sheet/navigation/popover/auto × light/dark, all modes comparison
+  - Updated `Sources/DSControls/DSControls.swift`:
+    - Added `DSPicker` and `DSPickerMode` to Topics section
+    - Updated Available Controls table
+  - Added 12 unit tests in `Tests/DSControlsTests/DSControlsTests.swift`:
+    - `DSPickerModeTests`:
+      - Auto mode resolves to sheet for iOS capabilities
+      - Auto mode resolves to menu for macOS capabilities
+      - Auto mode resolves to navigation for watchOS capabilities
+      - Sheet/menu/popover/navigation modes always resolve to themselves
+      - All cases count (5), unique raw values, Equatable, Hashable
+      - Custom capabilities preferred presentation respected
+  - Updated Showcase for all platforms:
+    - iOS: `DSPickerShowcaseView` — auto/menu/sheet/popover/navigation modes, with icon, disabled, spec details
+    - macOS: `DSPickerShowcasemacOSView` — two-column layout with all modes on left, icon/disabled/specs on right
+    - watchOS: `DSPickerShowcasewatchOSView` — auto/navigation modes, with icon, disabled, platform info
+
+**Tests:** All 73 DSControls tests pass (61 existing + 12 new DSPickerMode tests)
+**Build:** Clean build on all platforms (no warnings)
+**No breaking changes:** All existing APIs untouched
+
+---
 
 ### Session 16 - 2026-02-06
 **Completed:**

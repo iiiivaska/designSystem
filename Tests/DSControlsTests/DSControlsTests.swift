@@ -715,6 +715,122 @@ struct DSFieldSpecResolutionTests {
     }
 }
 
+// MARK: - DSPickerMode Tests
+
+@Suite("DSPickerMode Resolution")
+struct DSPickerModeTests {
+    
+    // MARK: - Auto Resolution
+    
+    @Test("Auto mode resolves to sheet for iOS capabilities")
+    func testAutoModeiOS() {
+        let caps = DSCapabilities.iOS()
+        let resolved = DSPickerMode.auto.resolved(with: caps)
+        #expect(resolved == .sheet)
+    }
+    
+    @Test("Auto mode resolves to menu for macOS capabilities")
+    func testAutoModemacOS() {
+        let caps = DSCapabilities.macOS()
+        let resolved = DSPickerMode.auto.resolved(with: caps)
+        #expect(resolved == .menu)
+    }
+    
+    @Test("Auto mode resolves to navigation for watchOS capabilities")
+    func testAutoModewatchOS() {
+        let caps = DSCapabilities.watchOS()
+        let resolved = DSPickerMode.auto.resolved(with: caps)
+        #expect(resolved == .navigation)
+    }
+    
+    // MARK: - Explicit Modes
+    
+    @Test("Sheet mode always resolves to sheet")
+    func testSheetMode() {
+        let platforms: [DSCapabilities] = [.iOS(), .macOS(), .watchOS()]
+        for caps in platforms {
+            let resolved = DSPickerMode.sheet.resolved(with: caps)
+            #expect(resolved == .sheet)
+        }
+    }
+    
+    @Test("Menu mode always resolves to menu")
+    func testMenuMode() {
+        let platforms: [DSCapabilities] = [.iOS(), .macOS(), .watchOS()]
+        for caps in platforms {
+            let resolved = DSPickerMode.menu.resolved(with: caps)
+            #expect(resolved == .menu)
+        }
+    }
+    
+    @Test("Popover mode always resolves to popover")
+    func testPopoverMode() {
+        let platforms: [DSCapabilities] = [.iOS(), .macOS(), .watchOS()]
+        for caps in platforms {
+            let resolved = DSPickerMode.popover.resolved(with: caps)
+            #expect(resolved == .popover)
+        }
+    }
+    
+    @Test("Navigation mode always resolves to navigation")
+    func testNavigationMode() {
+        let platforms: [DSCapabilities] = [.iOS(), .macOS(), .watchOS()]
+        for caps in platforms {
+            let resolved = DSPickerMode.navigation.resolved(with: caps)
+            #expect(resolved == .navigation)
+        }
+    }
+    
+    // MARK: - All Cases
+    
+    @Test("DSPickerMode has 5 cases")
+    func testAllCases() {
+        #expect(DSPickerMode.allCases.count == 5)
+        #expect(DSPickerMode.allCases.contains(.auto))
+        #expect(DSPickerMode.allCases.contains(.sheet))
+        #expect(DSPickerMode.allCases.contains(.popover))
+        #expect(DSPickerMode.allCases.contains(.menu))
+        #expect(DSPickerMode.allCases.contains(.navigation))
+    }
+    
+    @Test("DSPickerMode has unique raw values")
+    func testUniqueRawValues() {
+        let rawValues = DSPickerMode.allCases.map(\.rawValue)
+        #expect(Set(rawValues).count == rawValues.count)
+    }
+    
+    @Test("DSPickerMode is Equatable")
+    func testEquatable() {
+        #expect(DSPickerMode.auto == DSPickerMode.auto)
+        #expect(DSPickerMode.sheet != DSPickerMode.menu)
+    }
+    
+    @Test("DSPickerMode is Hashable")
+    func testHashable() {
+        let set: Set<DSPickerMode> = [.auto, .sheet, .menu, .popover, .navigation]
+        #expect(set.count == 5)
+    }
+    
+    // MARK: - Custom Capabilities
+    
+    @Test("Auto mode uses custom capabilities preferred presentation")
+    func testCustomCapabilities() {
+        let customCaps = DSCapabilities(
+            supportsHover: true,
+            supportsFocusRing: false,
+            supportsInlineTextEditing: true,
+            supportsInlinePickers: true,
+            supportsToasts: true,
+            prefersLargeTapTargets: false,
+            preferredFormRowLayout: .inline,
+            preferredPickerPresentation: .popover,
+            preferredTextFieldMode: .inline
+        )
+        let resolved = DSPickerMode.auto.resolved(with: customCaps)
+        #expect(resolved == .popover)
+    }
+}
+
 // MARK: - DSCheckboxState Tests
 
 @Suite("DSCheckboxState")
