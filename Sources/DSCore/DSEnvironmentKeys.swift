@@ -97,23 +97,57 @@ public protocol DSThemeProtocol: Sendable {
 ///     var body: some View {
 ///         Button("Tap") { }
 ///             .onHover { hovering in
-///                 guard capabilities?.supportsHover == true else { return }
+///                 guard capabilities.supportsHover else { return }
 ///                 // Handle hover state
 ///             }
 ///     }
 /// }
 /// ```
 ///
+/// ## Default Behavior
+///
+/// The default value is automatically determined by the current platform
+/// using ``DSCapabilities/platformDefault``. You don't need to explicitly
+/// set capabilities in most cases.
+///
+/// ## Custom Capabilities
+///
+/// To override capabilities (for testing or previews), use the
+/// ``SwiftUICore/View/dsCapabilities(_:)`` modifier:
+///
+/// ```swift
+/// MyView()
+///     .dsCapabilities(.watchOS())
+/// ```
+///
+/// - SeeAlso: ``DSCapabilities``
 /// - SeeAlso: ``DSCapabilitiesProtocol``
 public struct DSCapabilitiesEnvironmentKey: EnvironmentKey {
-    public static let defaultValue: DSCapabilitiesProtocol? = nil
+    public static let defaultValue: DSCapabilities = .platformDefault
 }
 
 extension EnvironmentValues {
     /// The current platform capabilities.
     ///
-    /// Returns `nil` if no capabilities have been set in the environment.
-    public var dsCapabilities: DSCapabilitiesProtocol? {
+    /// Defaults to ``DSCapabilities/platformDefault`` which provides
+    /// appropriate capabilities for the current platform.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// struct AdaptiveRow: View {
+    ///     @Environment(\.dsCapabilities) private var capabilities
+    ///
+    ///     var body: some View {
+    ///         if capabilities.preferredFormRowLayout == .stacked {
+    ///             VStack { rowContent }
+    ///         } else {
+    ///             HStack { rowContent }
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    public var dsCapabilities: DSCapabilities {
         get { self[DSCapabilitiesEnvironmentKey.self] }
         set { self[DSCapabilitiesEnvironmentKey.self] = newValue }
     }
@@ -136,7 +170,21 @@ extension EnvironmentValues {
 /// | Focus Ring | No | Yes | No |
 /// | Inline Text | Yes | Yes | No |
 /// | Inline Pickers | Yes | Yes | No |
+/// | Toasts | Yes | Yes | No |
 /// | Large Targets | Yes | No | Yes |
+///
+/// ## Layout Preferences
+///
+/// | Preference | iOS | macOS | watchOS |
+/// |------------|-----|-------|---------|
+/// | Form Row Layout | inline | twoColumn | stacked |
+/// | Picker Presentation | sheet | menu | navigation |
+/// | Text Field Mode | inline | inline | separateScreen |
+///
+/// ## Conformance
+///
+/// The concrete ``DSCapabilities`` struct conforms to this protocol
+/// and provides factory methods for platform-specific defaults.
 ///
 /// ## Topics
 ///
@@ -149,11 +197,17 @@ extension EnvironmentValues {
 ///
 /// - ``supportsInlineTextEditing``
 /// - ``supportsInlinePickers``
+/// - ``supportsToasts``
 ///
 /// ### Layout Preferences
 ///
 /// - ``prefersLargeTapTargets``
+/// - ``preferredFormRowLayout``
+/// - ``preferredPickerPresentation``
+/// - ``preferredTextFieldMode``
 public protocol DSCapabilitiesProtocol: Sendable {
+    
+    // MARK: - Interaction Capabilities
     
     /// Whether the platform supports hover states.
     ///
@@ -165,6 +219,8 @@ public protocol DSCapabilitiesProtocol: Sendable {
     /// `true` on macOS, `false` on iOS/watchOS.
     var supportsFocusRing: Bool { get }
     
+    // MARK: - Input Capabilities
+    
     /// Whether the platform supports inline text editing.
     ///
     /// `false` on watchOS where text entry opens a separate screen.
@@ -175,10 +231,37 @@ public protocol DSCapabilitiesProtocol: Sendable {
     /// `false` on watchOS where pickers use navigation.
     var supportsInlinePickers: Bool { get }
     
+    /// Whether the platform supports toast notifications.
+    ///
+    /// `false` on watchOS where screen space is limited.
+    var supportsToasts: Bool { get }
+    
+    // MARK: - Layout Preferences
+    
     /// Whether the platform prefers large tap targets.
     ///
     /// `true` on iOS and watchOS, `false` on macOS.
     var prefersLargeTapTargets: Bool { get }
+    
+    /// The preferred layout for form rows.
+    ///
+    /// Returns ``DSFormRowLayout/inline`` on iOS,
+    /// ``DSFormRowLayout/twoColumn`` on macOS,
+    /// and ``DSFormRowLayout/stacked`` on watchOS.
+    var preferredFormRowLayout: DSFormRowLayout { get }
+    
+    /// The preferred presentation for pickers.
+    ///
+    /// Returns ``DSPickerPresentation/sheet`` on iOS,
+    /// ``DSPickerPresentation/menu`` on macOS,
+    /// and ``DSPickerPresentation/navigation`` on watchOS.
+    var preferredPickerPresentation: DSPickerPresentation { get }
+    
+    /// The preferred mode for text field editing.
+    ///
+    /// Returns ``DSTextFieldMode/inline`` on iOS/macOS,
+    /// and ``DSTextFieldMode/separateScreen`` on watchOS.
+    var preferredTextFieldMode: DSTextFieldMode { get }
 }
 
 // MARK: - Accessibility Policy Environment Key
@@ -512,6 +595,28 @@ public struct DSAnimationContext: Sendable, Equatable {
 // MARK: - View Modifiers
 
 extension View {
+    
+    /// Sets the platform capabilities for this view hierarchy.
+    ///
+    /// Use this modifier to override the default platform capabilities,
+    /// which is useful for testing or creating previews that simulate
+    /// different platforms.
+    ///
+    /// ```swift
+    /// // Simulate watchOS behavior on iOS
+    /// MyView()
+    ///     .dsCapabilities(.watchOS())
+    ///
+    /// // Enable pointer interaction on iOS
+    /// MyView()
+    ///     .dsCapabilities(.iOSWithPointer())
+    /// ```
+    ///
+    /// - Parameter capabilities: The ``DSCapabilities`` to apply.
+    /// - Returns: A view with the capabilities set in its environment.
+    public func dsCapabilities(_ capabilities: DSCapabilities) -> some View {
+        environment(\.dsCapabilities, capabilities)
+    }
     
     /// Sets the Design System density for this view hierarchy.
     ///

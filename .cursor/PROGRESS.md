@@ -18,8 +18,8 @@
 ## Current Status
 
 **Phase:** 2 - Theme Resolution and Capabilities  
-**Current Step:** 6 - DSCapabilities System  
-**Progress:** 5 / 39 steps completed  
+**Current Step:** 8 - DSStyles Spec Protocols  
+**Progress:** 7 / 39 steps completed  
 
 ---
 
@@ -32,9 +32,9 @@
 - [x] Step 4: DSTokens Implementation
 - [x] Step 5: DSTheme Container
 
-### Phase 2: Theme Resolution and Capabilities (0/4)
-- [ ] Step 6: DSCapabilities System
-- [ ] Step 7: ThemeResolver Implementation
+### Phase 2: Theme Resolution and Capabilities (2/4)
+- [x] Step 6: DSCapabilities System
+- [x] Step 7: ThemeResolver Implementation
 - [ ] Step 8: DSStyles Spec Protocols
 - [ ] Step 9: DSStyles Default Implementations
 
@@ -85,6 +85,127 @@
 ---
 
 ## Session Log
+
+### Session 8 - 2026-02-05
+**Completed:**
+- Step 7: ThemeResolver Implementation
+  - Created `DSThemeResolver.swift` - Central theme resolution logic:
+    - `DSThemeResolver` enum as the single source for all resolution logic
+    - `DSThemeResolverInput` struct for bundling resolution parameters
+    - `resolve(_:)` and `resolve(variant:accessibility:density:)` methods
+  - Full `DSAccessibilityPolicy` integration:
+    - `increasedContrast` affects foreground colors, borders, and focus rings
+    - `reduceMotion` switches between `.standard` and `.reducedMotion` motion
+    - `dynamicTypeSize` scales typography and spacing via `scaleFactor`
+    - `isBoldTextEnabled` bumps font weights (regular→medium, semibold→bold)
+    - `reduceTransparency` reduces shadow opacity
+  - Category-specific resolution methods:
+    - `resolveColors(variant:accessibility:)` - Background, foreground, border, accent, state colors
+    - `resolveTypography(colors:accessibility:)` - System and component typography with dynamic type scaling
+    - `resolveSpacing(density:accessibility:)` - Padding, gap, insets, row height with density and accessibility multipliers
+    - `resolveRadii()` - Corner radius roles
+    - `resolveShadows(variant:accessibility:)` - Elevation, stroke, component shadows
+    - `resolveMotion(accessibility:)` - Duration, springs, component animations
+  - Updated `DSTheme.swift`:
+    - Added `DSThemeProtocol` conformance (id, displayName, isDark)
+    - Added `init(variant:accessibility:density:)` using resolver
+    - Added `init(from:)` for `DSThemeResolverInput`
+    - Added `.light(accessibility:density:)` and `.dark(accessibility:density:)` factory methods
+    - Added `.system(colorScheme:accessibility:density:)` factory method
+  - Created comprehensive unit tests:
+    - `DSThemeResolverTests` - 26 tests covering all resolution paths
+    - Tests for variant, accessibility (contrast, motion, dynamic type, bold, transparency), density
+    - Tests for DSTheme integration and protocol conformance
+    - All 50 tests pass (24 DSTheme + 26 DSThemeResolver)
+  - Updated Showcase apps with ThemeResolver demo:
+    - iOS: Full configuration UI (variant, density, dynamic type, accessibility toggles) + theme preview
+    - macOS: Two-column layout with configuration sidebar and full theme preview (colors, typography, spacing, radii, motion)
+    - watchOS: Compact variant toggle and key theme values preview
+    - Added "Theme Resolver" item to ShowcaseCore theme category
+
+**Artifacts:**
+- `Sources/DSTheme/DSThemeResolver.swift` - Central resolver with full accessibility support
+- `Sources/DSTheme/DSTheme.swift` - Updated with DSThemeProtocol and resolver integration
+- `Tests/DSThemeTests/DSThemeResolverTests.swift` - 26 comprehensive tests
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` - ThemeResolverShowcaseView
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` - ThemeResolverShowcasemacOSView
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` - ThemeResolverShowcasewatchOSView
+- `Showcase/ShowcaseCore/ShowcaseCore.swift` - Added themeresolver item
+
+**Key Design Decisions:**
+- `DSThemeResolver` is an enum (namespace) not a class/struct - no state, just pure functions
+- Resolver is the ONLY place where raw tokens → semantic roles mapping happens
+- All accessibility adjustments centralized in resolver methods
+- High contrast increases border widths (1.0→1.5, 2.0→3.0) and text opacity
+- Dynamic type scales both font sizes AND spacing for accessibility sizes
+- Reduce transparency multiplies shadow opacity by 0.3
+
+**Next Session:**
+- Continue with Phase 2: Theme Resolution and Capabilities
+- Step 8: DSStyles Spec Protocols
+
+---
+
+### Session 7 - 2026-02-05
+**Completed:**
+- Step 6: DSCapabilities System
+  - Created `DSCapabilities.swift` - Core capability definitions:
+    - `DSFormRowLayout` enum (.inline, .stacked) for row layout preferences
+    - `DSPickerPresentation` enum (.inline, .sheet, .navigationLink, .menu) for picker styles
+    - `DSTextFieldMode` enum (.inline, .separateScreen) for text field presentation
+    - `DSCapabilities` struct implementing `DSCapabilitiesProtocol` with all capabilities
+  - Created `DSCapabilities+Platform.swift` - Platform-specific defaults:
+    - `DSCapabilities.iOS()` - iOS defaults (touch, sheets, inline editing)
+    - `DSCapabilities.iOSWithPointer()` - iPad with pointer support
+    - `DSCapabilities.macOS()` - macOS defaults (hover, focus ring, menus)
+    - `DSCapabilities.watchOS()` - watchOS defaults (large targets, navigation patterns)
+    - `DSCapabilities.tvOS()` - tvOS defaults (focus-driven, navigation)
+    - `DSCapabilities.visionOS()` - visionOS defaults (hover, inline patterns)
+    - `platformDefault` static property using compile-time platform detection
+  - Updated `DSCapabilitiesProtocol` with full capability interface:
+    - Interaction: `supportsHover`, `supportsFocusRing`
+    - Input: `supportsInlineTextEditing`, `supportsInlinePickers`, `supportsToasts`
+    - Layout: `prefersLargeTapTargets`, `preferredFormRowLayout`, `preferredPickerPresentation`, `preferredTextFieldMode`
+  - Updated `DSEnvironmentKeys.swift`:
+    - Changed `DSCapabilitiesEnvironmentKey.defaultValue` to concrete `DSCapabilities.platformDefault`
+    - Added `.dsCapabilities(_:)` view modifier for easy injection
+  - Computed capabilities in `DSCapabilities`:
+    - `supportsPointerInteraction` - hover OR focus ring
+    - `requiresNavigationPatterns` - needs navigation for selection
+    - `isCompactScreen` - prefers large tap targets AND stacked layout
+    - `minimumTapTargetSize` - 44pt (default) or 56pt (large targets)
+  - Created comprehensive unit tests:
+    - `DSCapabilitiesTests` - 11 tests for platform defaults and computed properties
+    - `DSFormRowLayoutTests` - raw value and comparison tests
+    - `DSPickerPresentationTests` - raw value tests for all presentation types
+    - `DSTextFieldModeTests` - raw value tests for text field modes
+  - Updated Showcase apps with Capabilities demo:
+    - iOS: Platform selector, capabilities display, capability matrix
+    - macOS: Two-column layout with platform selector and computed capabilities
+    - watchOS: Compact view showing current platform capabilities
+
+**Artifacts:**
+- `Sources/DSCore/DSCapabilities.swift` - Core structs and enums
+- `Sources/DSCore/DSCapabilities+Platform.swift` - Platform defaults and computed properties
+- `Sources/DSCore/DSEnvironmentKeys.swift` - Updated environment integration
+- `Tests/DSCoreTests/DSCoreTests.swift` - 53 tests (all passing)
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` - CapabilitiesShowcaseView
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` - CapabilitiesShowcasemacOSView
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` - CapabilitiesShowcasewatchOSView
+- `Showcase/ShowcaseCore/ShowcaseCore.swift` - Added Capabilities item
+
+**Key Design Decisions:**
+- Capabilities are query-based (components ask "can I do X?") not platform-based
+- Platform detection centralized in `DSCapabilities.platformDefault` (single #if location)
+- All capabilities have sensible defaults that degrade gracefully
+- Showcase demonstrates platform simulation for testing
+- watchOS uses simplified view without platform selector (too compact)
+
+**Next Session:**
+- Continue with Phase 2: Theme Resolution and Capabilities
+- Step 7: ThemeResolver Implementation
+
+---
 
 ### Session 6 - 2026-02-05
 **Completed:**

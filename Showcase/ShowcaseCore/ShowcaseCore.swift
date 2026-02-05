@@ -93,6 +93,8 @@ public enum ShowcaseData {
             ]
         case .theme:
             return [
+                ShowcaseItem(id: "themeresolver", title: "Theme Resolver", subtitle: "Accessibility integration", icon: "wand.and.stars"),
+                ShowcaseItem(id: "capabilities", title: "Capabilities", subtitle: "Platform capabilities", icon: "gearshape.2"),
                 ShowcaseItem(id: "colors", title: "Colors", subtitle: "Color palette", icon: "paintpalette"),
                 ShowcaseItem(id: "typography", title: "Typography", subtitle: "Text styles", icon: "textformat.size"),
                 ShowcaseItem(id: "spacing", title: "Spacing", subtitle: "Spacing scale", icon: "ruler"),

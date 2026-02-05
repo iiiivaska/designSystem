@@ -390,3 +390,246 @@ struct DSAnimationContextTests {
         #expect(reducedContext.animationsEnabled == false)
     }
 }
+
+// MARK: - DSCapabilities Tests
+
+@Suite("DSCapabilities Tests")
+struct DSCapabilitiesTests {
+    
+    @Test("Platform default capabilities exist")
+    func testPlatformDefaultExists() {
+        let caps = DSCapabilities.platformDefault
+        // Should have valid enum values
+        #expect(DSFormRowLayout.allCases.contains(caps.preferredFormRowLayout))
+        #expect(DSPickerPresentation.allCases.contains(caps.preferredPickerPresentation))
+        #expect(DSTextFieldMode.allCases.contains(caps.preferredTextFieldMode))
+    }
+    
+    @Test("iOS capabilities defaults")
+    func testIOSCapabilities() {
+        let caps = DSCapabilities.iOS()
+        
+        // Interaction
+        #expect(caps.supportsHover == false)
+        #expect(caps.supportsFocusRing == false)
+        
+        // Input
+        #expect(caps.supportsInlineTextEditing == true)
+        #expect(caps.supportsInlinePickers == true)
+        #expect(caps.supportsToasts == true)
+        
+        // Layout
+        #expect(caps.prefersLargeTapTargets == true)
+        #expect(caps.preferredFormRowLayout == .inline)
+        #expect(caps.preferredPickerPresentation == .sheet)
+        #expect(caps.preferredTextFieldMode == .inline)
+    }
+    
+    @Test("iOS with pointer capabilities")
+    func testIOSWithPointerCapabilities() {
+        let caps = DSCapabilities.iOSWithPointer()
+        
+        // Should enable hover and focus ring
+        #expect(caps.supportsHover == true)
+        #expect(caps.supportsFocusRing == true)
+        
+        // Other properties same as iOS
+        #expect(caps.supportsInlineTextEditing == true)
+        #expect(caps.prefersLargeTapTargets == true)
+        #expect(caps.preferredFormRowLayout == .inline)
+    }
+    
+    @Test("macOS capabilities defaults")
+    func testMacOSCapabilities() {
+        let caps = DSCapabilities.macOS()
+        
+        // Interaction
+        #expect(caps.supportsHover == true)
+        #expect(caps.supportsFocusRing == true)
+        
+        // Input
+        #expect(caps.supportsInlineTextEditing == true)
+        #expect(caps.supportsInlinePickers == true)
+        #expect(caps.supportsToasts == true)
+        
+        // Layout
+        #expect(caps.prefersLargeTapTargets == false)
+        #expect(caps.preferredFormRowLayout == .twoColumn)
+        #expect(caps.preferredPickerPresentation == .menu)
+        #expect(caps.preferredTextFieldMode == .inline)
+    }
+    
+    @Test("watchOS capabilities defaults")
+    func testWatchOSCapabilities() {
+        let caps = DSCapabilities.watchOS()
+        
+        // Interaction
+        #expect(caps.supportsHover == false)
+        #expect(caps.supportsFocusRing == false)
+        
+        // Input
+        #expect(caps.supportsInlineTextEditing == false)
+        #expect(caps.supportsInlinePickers == false)
+        #expect(caps.supportsToasts == false)
+        
+        // Layout
+        #expect(caps.prefersLargeTapTargets == true)
+        #expect(caps.preferredFormRowLayout == .stacked)
+        #expect(caps.preferredPickerPresentation == .navigation)
+        #expect(caps.preferredTextFieldMode == .separateScreen)
+    }
+    
+    @Test("Capabilities for platform factory method")
+    func testCapabilitiesForPlatform() {
+        let iosCaps = DSCapabilities.for(platform: .iOS)
+        let macCaps = DSCapabilities.for(platform: .macOS)
+        let watchCaps = DSCapabilities.for(platform: .watchOS)
+        
+        // Should match direct factory methods
+        #expect(iosCaps == DSCapabilities.iOS())
+        #expect(macCaps == DSCapabilities.macOS())
+        #expect(watchCaps == DSCapabilities.watchOS())
+    }
+    
+    @Test("Capabilities equality")
+    func testCapabilitiesEquality() {
+        let caps1 = DSCapabilities.iOS()
+        let caps2 = DSCapabilities.iOS()
+        let caps3 = DSCapabilities.macOS()
+        
+        #expect(caps1 == caps2)
+        #expect(caps1 != caps3)
+    }
+    
+    @Test("Capabilities hashable")
+    func testCapabilitiesHashable() {
+        let caps1 = DSCapabilities.iOS()
+        let caps2 = DSCapabilities.iOS()
+        let caps3 = DSCapabilities.macOS()
+        
+        var set = Set<DSCapabilities>()
+        set.insert(caps1)
+        set.insert(caps2)
+        set.insert(caps3)
+        
+        // Should have 2 unique entries (iOS and macOS)
+        #expect(set.count == 2)
+    }
+    
+    @Test("Computed capability queries")
+    func testComputedCapabilityQueries() {
+        let macos = DSCapabilities.macOS()
+        #expect(macos.supportsPointerInteraction == true)
+        #expect(macos.requiresNavigationPatterns == false)
+        #expect(macos.isCompactScreen == false)
+        #expect(macos.minimumTapTargetSize == 24)
+        
+        let watch = DSCapabilities.watchOS()
+        #expect(watch.supportsPointerInteraction == false)
+        #expect(watch.requiresNavigationPatterns == true)
+        #expect(watch.isCompactScreen == true)
+        #expect(watch.minimumTapTargetSize == 44)
+        
+        let ios = DSCapabilities.iOS()
+        #expect(ios.supportsPointerInteraction == false)
+        #expect(ios.requiresNavigationPatterns == false)
+        #expect(ios.isCompactScreen == false)
+        #expect(ios.minimumTapTargetSize == 44)
+    }
+    
+    @Test("Custom capabilities initialization")
+    func testCustomCapabilitiesInit() {
+        let custom = DSCapabilities(
+            supportsHover: true,
+            supportsFocusRing: false,
+            supportsInlineTextEditing: true,
+            supportsInlinePickers: false,
+            supportsToasts: true,
+            prefersLargeTapTargets: true,
+            preferredFormRowLayout: .stacked,
+            preferredPickerPresentation: .popover,
+            preferredTextFieldMode: .inline
+        )
+        
+        #expect(custom.supportsHover == true)
+        #expect(custom.supportsFocusRing == false)
+        #expect(custom.supportsInlinePickers == false)
+        #expect(custom.preferredFormRowLayout == .stacked)
+        #expect(custom.preferredPickerPresentation == .popover)
+    }
+    
+    @Test("Capabilities description")
+    func testCapabilitiesDescription() {
+        let caps = DSCapabilities.iOS()
+        let description = caps.description
+        
+        // Description should contain key property names
+        #expect(description.contains("supportsHover"))
+        #expect(description.contains("supportsFocusRing"))
+        #expect(description.contains("preferredFormRowLayout"))
+        #expect(description.contains("DSCapabilities"))
+    }
+}
+
+// MARK: - Form Row Layout Tests
+
+@Suite("DSFormRowLayout Tests")
+struct DSFormRowLayoutTests {
+    
+    @Test("Form row layout cases exist")
+    func testFormRowLayoutCases() {
+        #expect(DSFormRowLayout.allCases.count == 3)
+        #expect(DSFormRowLayout.allCases.contains(.stacked))
+        #expect(DSFormRowLayout.allCases.contains(.inline))
+        #expect(DSFormRowLayout.allCases.contains(.twoColumn))
+    }
+    
+    @Test("Form row layout raw values")
+    func testFormRowLayoutRawValues() {
+        #expect(DSFormRowLayout.stacked.rawValue == "stacked")
+        #expect(DSFormRowLayout.inline.rawValue == "inline")
+        #expect(DSFormRowLayout.twoColumn.rawValue == "twoColumn")
+    }
+}
+
+// MARK: - Picker Presentation Tests
+
+@Suite("DSPickerPresentation Tests")
+struct DSPickerPresentationTests {
+    
+    @Test("Picker presentation cases exist")
+    func testPickerPresentationCases() {
+        #expect(DSPickerPresentation.allCases.count == 4)
+        #expect(DSPickerPresentation.allCases.contains(.sheet))
+        #expect(DSPickerPresentation.allCases.contains(.popover))
+        #expect(DSPickerPresentation.allCases.contains(.menu))
+        #expect(DSPickerPresentation.allCases.contains(.navigation))
+    }
+    
+    @Test("Picker presentation raw values")
+    func testPickerPresentationRawValues() {
+        #expect(DSPickerPresentation.sheet.rawValue == "sheet")
+        #expect(DSPickerPresentation.popover.rawValue == "popover")
+        #expect(DSPickerPresentation.menu.rawValue == "menu")
+        #expect(DSPickerPresentation.navigation.rawValue == "navigation")
+    }
+}
+
+// MARK: - Text Field Mode Tests
+
+@Suite("DSTextFieldMode Tests")
+struct DSTextFieldModeTests {
+    
+    @Test("Text field mode cases exist")
+    func testTextFieldModeCases() {
+        #expect(DSTextFieldMode.allCases.count == 2)
+        #expect(DSTextFieldMode.allCases.contains(.inline))
+        #expect(DSTextFieldMode.allCases.contains(.separateScreen))
+    }
+    
+    @Test("Text field mode raw values")
+    func testTextFieldModeRawValues() {
+        #expect(DSTextFieldMode.inline.rawValue == "inline")
+        #expect(DSTextFieldMode.separateScreen.rawValue == "separateScreen")
+    }
+}

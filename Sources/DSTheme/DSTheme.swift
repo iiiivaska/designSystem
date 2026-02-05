@@ -93,7 +93,25 @@ public enum DSThemeVariant: String, Sendable, Equatable, CaseIterable {
 ///
 /// - ``DSThemeVariant``
 /// - ``init(variant:density:reduceMotion:)``
-public struct DSTheme: Sendable, Equatable {
+/// - ``init(variant:accessibility:density:)``
+public struct DSTheme: Sendable, Equatable, DSThemeProtocol {
+    
+    // MARK: - DSThemeProtocol
+    
+    /// Unique identifier for the theme.
+    public var id: String {
+        "\(variant.rawValue)-\(density.rawValue)"
+    }
+    
+    /// Human-readable name for the theme.
+    public var displayName: String {
+        switch variant {
+        case .light:
+            return "Light"
+        case .dark:
+            return "Dark"
+        }
+    }
     
     // MARK: - Version
     
@@ -201,6 +219,48 @@ public struct DSTheme: Sendable, Equatable {
         self.motion = reduceMotion ? .reducedMotion : .standard
     }
     
+    /// Creates a theme from tokens with full accessibility support.
+    ///
+    /// This is the preferred factory method for creating themes with
+    /// full accessibility integration, including dynamic type, high
+    /// contrast, reduce motion, and bold text support.
+    ///
+    /// - Parameters:
+    ///   - variant: Theme variant (light/dark)
+    ///   - accessibility: Accessibility settings to apply
+    ///   - density: UI density (default: `.regular`)
+    public init(
+        variant: DSThemeVariant,
+        accessibility: DSAccessibilityPolicy,
+        density: DSDensity = .regular
+    ) {
+        let resolved = DSThemeResolver.resolve(
+            variant: variant,
+            accessibility: accessibility,
+            density: density
+        )
+        
+        self.variant = resolved.variant
+        self.density = resolved.density
+        self.colors = resolved.colors
+        self.typography = resolved.typography
+        self.spacing = resolved.spacing
+        self.radii = resolved.radii
+        self.shadows = resolved.shadows
+        self.motion = resolved.motion
+    }
+    
+    /// Creates a theme from resolver input.
+    ///
+    /// - Parameter input: The resolver input configuration.
+    public init(from input: DSThemeResolverInput) {
+        self.init(
+            variant: input.variant,
+            accessibility: input.accessibility,
+            density: input.density
+        )
+    }
+    
     /// Creates a default light theme.
     public init() {
         self.init(variant: .light)
@@ -213,6 +273,36 @@ public struct DSTheme: Sendable, Equatable {
     
     /// Dark theme with standard settings.
     public static let dark = DSTheme(variant: .dark)
+    
+    /// Light theme with accessibility support.
+    ///
+    /// - Parameter accessibility: Accessibility settings to apply.
+    /// - Returns: A light theme with accessibility adjustments.
+    public static func light(
+        accessibility: DSAccessibilityPolicy,
+        density: DSDensity = .regular
+    ) -> DSTheme {
+        DSTheme(
+            variant: .light,
+            accessibility: accessibility,
+            density: density
+        )
+    }
+    
+    /// Dark theme with accessibility support.
+    ///
+    /// - Parameter accessibility: Accessibility settings to apply.
+    /// - Returns: A dark theme with accessibility adjustments.
+    public static func dark(
+        accessibility: DSAccessibilityPolicy,
+        density: DSDensity = .regular
+    ) -> DSTheme {
+        DSTheme(
+            variant: .dark,
+            accessibility: accessibility,
+            density: density
+        )
+    }
     
     /// Creates a theme matching the system appearance.
     ///
@@ -230,6 +320,25 @@ public struct DSTheme: Sendable, Equatable {
             variant: DSThemeVariant(from: colorScheme),
             density: density,
             reduceMotion: reduceMotion
+        )
+    }
+    
+    /// Creates a theme matching the system appearance with full accessibility.
+    ///
+    /// - Parameters:
+    ///   - colorScheme: System color scheme.
+    ///   - accessibility: Accessibility settings.
+    ///   - density: UI density.
+    /// - Returns: A theme matching system settings with accessibility.
+    public static func system(
+        colorScheme: ColorScheme,
+        accessibility: DSAccessibilityPolicy,
+        density: DSDensity = .regular
+    ) -> DSTheme {
+        DSTheme(
+            variant: DSThemeVariant(from: colorScheme),
+            accessibility: accessibility,
+            density: density
         )
     }
 }
