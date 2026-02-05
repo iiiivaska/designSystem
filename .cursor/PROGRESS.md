@@ -18,8 +18,8 @@
 ## Current Status
 
 **Phase:** 3 - Primitives (In Progress)  
-**Current Step:** 11 - DSIcon Primitive (Done)  
-**Progress:** 11 / 39 steps completed  
+**Current Step:** 12 - DSSurface and DSCard Primitives (Done)  
+**Progress:** 12 / 39 steps completed  
 
 ---
 
@@ -38,10 +38,10 @@
 - [x] Step 8: DSStyles Spec Protocols
 - [x] Step 9: DSStyles Default Implementations
 
-### Phase 3: Primitives (2/4)
+### Phase 3: Primitives (3/4)
 - [x] Step 10: DSText Primitive
 - [x] Step 11: DSIcon Primitive
-- [ ] Step 12: DSSurface and DSCard Primitives
+- [x] Step 12: DSSurface and DSCard Primitives
 - [ ] Step 13: DSLoader Primitive
 
 ### Phase 4: Controls MVP (0/6)
@@ -85,6 +85,94 @@
 ---
 
 ## Session Log
+
+### Session 12b - 2026-02-05
+**Completed:**
+- Refactored Showcase theme switching to global level
+  - Added `isDarkMode` state + toolbar toggle (sun/moon icon) to all platform root views:
+    - iOS: `ShowcaseiOSRootView` — toolbar button in `.topBarTrailing`
+    - macOS: `ShowcasemacOSRootView` — toolbar button
+    - watchOS: `ShowcasewatchOSRootView` — toolbar button, defaults to dark
+  - Applied `.dsTheme()` and `.preferredColorScheme()` at root level
+  - Refactored DSSurface/DSCard showcase views to read `@Environment(\.dsTheme)` instead of local `isDarkMode` state
+  - Removed per-component "Dark Mode" toggles from Surface/Card showcase views
+  - Reverted `preferredColorScheme(.light)` patches from showcase comparison sections
+  - Used `.environment(\.colorScheme, ...)` (hierarchical) instead of `.preferredColorScheme()` (window-level) for side-by-side Light vs Dark comparison sections
+  - Updated DSCard.swift previews to use `.environment(\.colorScheme, ...)` for comparison
+
+**Artifacts:**
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` — global theme toggle + refactored showcase views
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` — global theme toggle + refactored showcase views
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` — global theme toggle + refactored showcase views
+- `Sources/DSPrimitives/DSCard.swift` — reverted preferredColorScheme in previews
+
+---
+
+### Session 12 - 2026-02-05
+**Completed:**
+- Step 12: DSSurface and DSCard Primitives - Background and elevation containers
+  - Created `Sources/DSPrimitives/DSSurface.swift` - Semantic background container:
+    - `DSSurfaceRole` enum: canvas, surface, surfaceElevated, card
+    - `resolveColor(from:)` maps role → theme background color
+    - `DSSurface<Content>` generic view with ViewBuilder content
+    - Optional `stroke` parameter for subtle border
+    - Optional `cornerRadius` parameter with continuous corner style
+    - Sends theme separator color/width from `DSStrokeRoles`
+    - CaseIterable + Identifiable for showcase iteration
+    - Previews for all platforms and color schemes (light/dark, nested, stroke)
+  - Created `Sources/DSPrimitives/DSCard.swift` - Elevated card container:
+    - `DSCard<Content>` generic view with ViewBuilder content
+    - Init with `DSCardElevation` (flat, raised, elevated, overlay)
+    - Resolves `DSCardSpec` from theme via `theme.resolveCard(elevation:)`
+    - Glass effect for dark theme elevated/overlay cards:
+      - Semi-transparent background color (0.7 opacity)
+      - `.ultraThinMaterial` overlay for blur effect
+      - Glass border color from spec
+    - Standard cards: solid background + shadow + optional border
+    - Shadow applied from resolved spec
+    - Optional `padding` override (default from spec)
+    - Continuous corner style with `RoundedRectangle`
+    - Previews: all elevations, glass comparison, card with content, custom padding
+  - Created `Sources/DSPrimitives/DSDivider.swift` - Themed divider:
+    - `DSDividerOrientation` enum: horizontal, vertical
+    - Uses theme separator color and width from `DSStrokeRoles`
+    - Hairline rendering via display scale factor (`UIScale` helper)
+    - Cross-platform scale detection (iOS/macOS/watchOS)
+    - Optional `insets` parameter for edge padding
+    - `accessibilityHidden(true)` for decorative element
+    - Previews: horizontal, vertical, in card context, light/dark
+  - Updated `Sources/DSPrimitives/DSPrimitives.swift`:
+    - Added Surface Components topic group with DSSurface, DSSurfaceRole, DSCard, DSDivider, DSDividerOrientation
+    - Updated module header comments to reflect implemented status
+  - Updated Showcase apps for all platforms:
+    - iOS: `DSSurfaceShowcaseView` (dark toggle, stroke toggle, role list, nested surfaces) + `DSCardShowcaseView` (elevation picker, spec details, glass comparison, DSDivider demo)
+    - macOS: `DSSurfaceShowcasemacOSView` (two-column with config sidebar, color swatches, nested layout) + `DSCardShowcasemacOSView` (two-column with spec badges, light/dark comparison, card with content)
+    - watchOS: `DSSurfaceShowcasewatchOSView` (compact light/dark surfaces, stroke demo) + `DSCardShowcasewatchOSView` (compact elevation list, glass effect, DSDivider in card)
+    - Added routing cases for "dssurface" and "dscard" in all platform Showcase views
+
+**Artifacts:**
+- `Sources/DSPrimitives/DSSurface.swift` - Semantic background container
+- `Sources/DSPrimitives/DSCard.swift` - Elevated card with glass effect
+- `Sources/DSPrimitives/DSDivider.swift` - Themed horizontal/vertical divider
+- `Sources/DSPrimitives/DSPrimitives.swift` - Updated module documentation
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` - DSSurfaceShowcaseView + DSCardShowcaseView
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` - DSSurfaceShowcasemacOSView + DSCardShowcasemacOSView
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` - DSSurfaceShowcasewatchOSView + DSCardShowcasewatchOSView
+
+**Key Design Decisions:**
+- DSSurface uses DSSurfaceRole enum (not raw Color) for semantic background resolution
+- DSCard delegates all styling to DSCardSpec resolved from theme (resolve-then-render)
+- Glass effect uses ZStack with semi-transparent bg color + .ultraThinMaterial for authentic blur
+- DSDivider uses cross-platform UIScale helper for hairline rendering (1px / scale)
+- DSDivider hidden from accessibility as purely decorative
+- No #if os() in component code — DSDivider uses UIScale enum with compile-time platform selection
+- All 279 existing tests continue to pass
+
+**Next Session:**
+- Continue with Phase 3: Primitives
+- Step 13: DSLoader Primitive
+
+---
 
 ### Session 11 - 2026-02-05
 **Completed:**

@@ -1,7 +1,7 @@
 // DSPrimitives.swift
 // DesignSystem
 //
-// Primitive UI components: DSText, DSIcon, DSSurface, DSCard, DSLoader, DSProgress.
+// Primitive UI components: DSText, DSIcon, DSSurface, DSCard, DSDivider, DSLoader, DSProgress.
 // These are the basic building blocks using theme tokens.
 //
 // ## Overview
@@ -21,11 +21,13 @@
 // - ``DSIconColor``: Icon color modes (semantic and custom)
 // - ``DSIconToken``: Common SF Symbol name constants
 //
-// ### Surfaces (Planned)
+// ### Surfaces
 //
-// - `DSSurface`: Background and elevation containers
-// - `DSCard`: Elevated card component
-// - `DSDivider`: Themed divider
+// - ``DSSurface``: Semantic background container with theme colors
+// - ``DSSurfaceRole``: Background role enum (canvas, surface, surfaceElevated, card)
+// - ``DSCard``: Elevated card with shadow, border, and glass effect
+// - ``DSDivider``: Themed horizontal/vertical divider
+// - ``DSDividerOrientation``: Divider orientation (horizontal, vertical)
 //
 // ### Loading (Planned)
 //
@@ -53,6 +55,14 @@ import DSTheme
 /// - ``DSIconSize``
 /// - ``DSIconColor``
 /// - ``DSIconToken``
+///
+/// ### Surface Components
+///
+/// - ``DSSurface``
+/// - ``DSSurfaceRole``
+/// - ``DSCard``
+/// - ``DSDivider``
+/// - ``DSDividerOrientation``
 public enum DSPrimitivesModule {
     /// Current version of the primitives module.
     public static let version = "0.1.0"

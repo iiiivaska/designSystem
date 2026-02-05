@@ -10,6 +10,10 @@ import DSTheme
 import DSPrimitives
 
 struct ShowcasewatchOSRootView: View {
+    @State private var isDarkMode = true
+    
+    private var theme: DSTheme { isDarkMode ? .dark : .light }
+    
     var body: some View {
         NavigationStack {
             List(ShowcaseCategory.allCases) { category in
@@ -24,7 +28,19 @@ struct ShowcasewatchOSRootView: View {
             .navigationDestination(for: ShowcaseItem.self) { item in
                 ShowcasewatchOSDetailView(item: item)
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isDarkMode.toggle()
+                    } label: {
+                        Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
+                    }
+                    .accessibilityLabel(isDarkMode ? "Switch to light mode" : "Switch to dark mode")
+                }
+            }
         }
+        .dsTheme(theme)
+        .preferredColorScheme(isDarkMode ? .dark : .light)
     }
 }
 
@@ -86,6 +102,10 @@ struct ShowcasewatchOSDetailView: View {
             ComponentSpecsShowcasewatchOSView()
         case "componentstyles":
             ComponentStylesShowcasewatchOSView()
+        case "dssurface":
+            DSSurfaceShowcasewatchOSView()
+        case "dscard":
+            DSCardShowcasewatchOSView()
         default:
             // Placeholder for component demos
             Text("Demo coming soon")
@@ -634,5 +654,114 @@ struct DSIconShowcasewatchOSView: View {
                 .padding()
         }
         .navigationTitle("DSIcon")
+    }
+}
+
+// MARK: - DSSurface Showcase (watchOS)
+
+/// Compact watchOS showcase for DSSurface
+struct DSSurfaceShowcasewatchOSView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            // Surface Roles
+            Text("Surface Roles")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+            DSSurface(.canvas) {
+                VStack(spacing: 0) {
+                    ForEach(DSSurfaceRole.allCases) { role in
+                        DSSurface(role) {
+                            HStack {
+                                DSText(role.displayName, role: .footnote)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                        }
+                    }
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+            // Stroke demo
+            Text("With Stroke")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+            DSSurface(.card, stroke: true, cornerRadius: 10) {
+                DSText("Card with border", role: .footnote)
+                    .padding(8)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+    }
+}
+
+// MARK: - DSCard Showcase (watchOS)
+
+/// Compact watchOS showcase for DSCard
+struct DSCardShowcasewatchOSView: View {
+    @Environment(\.dsTheme) private var theme
+
+    var body: some View {
+        VStack(spacing: 12) {
+            // All elevations
+            Text("Elevations")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+            ZStack {
+                (theme.isDark ? Color(hex: "#0B0E14") : Color(hex: "#F7F8FA"))
+                VStack(spacing: 8) {
+                    ForEach(DSCardElevation.allCases, id: \.self) { elevation in
+                        DSCard(elevation) {
+                            DSText(elevation.rawValue.capitalized, role: .footnote)
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                }
+                .padding(8)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+            // DSDivider demo
+            Text("DSDivider")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+            DSCard(.raised) {
+                VStack(spacing: 0) {
+                    DSText("Item 1", role: .footnote)
+                        .padding(.vertical, 6)
+                    DSDivider()
+                    DSText("Item 2", role: .footnote)
+                        .padding(.vertical, 6)
+                    DSDivider()
+                    DSText("Item 3", role: .footnote)
+                        .padding(.vertical, 6)
+                }
+            }
+        }
+    }
+}
+
+#Preview("DSSurface watchOS") {
+    NavigationStack {
+        ScrollView {
+            DSSurfaceShowcasewatchOSView()
+                .padding()
+        }
+        .navigationTitle("DSSurface")
+    }
+}
+
+#Preview("DSCard watchOS") {
+    NavigationStack {
+        ScrollView {
+            DSCardShowcasewatchOSView()
+                .padding()
+        }
+        .navigationTitle("DSCard")
     }
 }
