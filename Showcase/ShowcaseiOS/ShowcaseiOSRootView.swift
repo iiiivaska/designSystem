@@ -9,6 +9,7 @@ import DSCore
 import DSTheme
 import DSPrimitives
 import DSControls
+import DSForms
 
 struct ShowcaseiOSRootView: View {
     @State private var selectedCategory: ShowcaseCategory?
@@ -130,6 +131,8 @@ struct ShowcaseDetailView: View {
             DSStepperShowcaseView()
         case "dsslider":
             DSSliderShowcaseView()
+        case "dsform":
+            DSFormShowcaseView()
         default:
             // Placeholder for components not yet implemented
             ShowcasePlaceholder(

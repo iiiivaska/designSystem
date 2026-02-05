@@ -9,6 +9,7 @@ import DSCore
 import DSTheme
 import DSPrimitives
 import DSControls
+import DSForms
 
 struct ShowcasewatchOSRootView: View {
     @State private var isDarkMode = true
@@ -121,6 +122,8 @@ struct ShowcasewatchOSDetailView: View {
             DSStepperShowcasewatchOSView()
         case "dsslider":
             DSSliderShowcasewatchOSView()
+        case "dsform":
+            DSFormShowcasewatchOSView()
         default:
             // Placeholder for component demos
             Text("Demo coming soon")

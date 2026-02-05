@@ -9,6 +9,7 @@ import DSCore
 import DSTheme
 import DSPrimitives
 import DSControls
+import DSForms
 
 struct ShowcasemacOSRootView: View {
     @State private var selectedCategory: ShowcaseCategory? = .primitives
@@ -132,6 +133,8 @@ struct ShowcasemacOSDetailView: View {
             DSStepperShowcasemacOSView()
         case "dsslider":
             DSSliderShowcasemacOSView()
+        case "dsform":
+            DSFormShowcasemacOSView()
         default:
             // Demo sections
             GroupBox("Light Theme") {

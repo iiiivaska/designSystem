@@ -17,9 +17,9 @@
 
 ## Current Status
 
-**Phase:** 4 - Controls MVP (Complete)  
-**Current Step:** 19 - DSSlider Control (Done)  
-**Progress:** 19 / 39 steps completed  
+**Phase:** 5 - Forms MVP (In Progress)  
+**Current Step:** 20 - DSForm Container (Done)  
+**Progress:** 20 / 39 steps completed  
 
 ---
 
@@ -52,8 +52,8 @@
 - [x] Step 18: DSStepper Control
 - [x] Step 19: DSSlider Control (optional)
 
-### Phase 5: Forms MVP (0/5)
-- [ ] Step 20: DSForm Container
+### Phase 5: Forms MVP (1/5)
+- [x] Step 20: DSForm Container
 - [ ] Step 21: DSFormSection
 - [ ] Step 22: DSFormRow Layout System
 - [ ] Step 23: Form Validation System
@@ -85,6 +85,70 @@
 ---
 
 ## Session Log
+
+### Session 20 - 2026-02-06
+**Completed:**
+- Step 20: DSForm Container — Form layout with keyboard avoidance
+  - Created `Sources/DSForms/DSFormConfiguration.swift` — Form configuration:
+    - `DSFormLayoutMode` enum: `.auto`, `.fixed(DSFormRowLayout)`
+      - Auto mode delegates to platform capabilities
+      - Fixed mode forces specific layout (inline/stacked/twoColumn)
+    - `DSFormValidationDisplayMode` enum: `.inline`, `.below`, `.summary`, `.hidden`
+      - Controls how validation messages are shown
+    - `DSFormConfiguration` struct with all form settings:
+      - `layoutMode: DSFormLayoutMode` — Row layout selection
+      - `validationDisplay: DSFormValidationDisplayMode` — Validation display mode
+      - `density: DSDensity?` — Optional density override
+      - `keyboardAvoidanceEnabled: Bool` — Enable keyboard avoidance (iOS)
+      - `showRowSeparators: Bool` — Show dividers between rows
+      - `animation: Animation?` — Animation for state changes
+    - Configuration presets: `.default`, `.compact`, `.settings`, `.twoColumn`, `.stacked`
+    - `DSFormConfigurationEnvironmentKey` for environment injection
+    - View modifier `.dsFormConfiguration(_:)` for applying configuration
+  - Created `Sources/DSForms/DSForm.swift` — Main form container:
+    - `DSForm<Content: View>` generic container view
+    - Platform-adaptive behavior:
+      - iOS: Inline layout, keyboard avoidance enabled
+      - macOS: Two-column layout, focus ring support, constrained width (800pt max)
+      - watchOS: Stacked layout, minimal padding
+    - Keyboard avoidance support (iOS):
+      - `ScrollViewReader` for focus management
+      - `.scrollDismissesKeyboard(.interactively)` for dismissal
+    - Environment propagation:
+      - `dsFormConfiguration` — Full configuration
+      - `dsDensity` — Effective density (config or environment)
+      - `dsFormResolvedLayout` — Resolved layout after auto-degradation
+    - Static factory methods: `.inline{}`, `.stacked{}`, `.twoColumn{}`, `.settings{}`
+    - Fluent modifiers: `.layoutMode(_:)`, `.validationDisplay(_:)`, `.formDensity(_:)`, `.keyboardAvoidance(_:)`, `.showSeparators(_:)`
+    - Platform-specific previews for iOS, macOS, watchOS
+  - Updated `Sources/DSForms/DSForms.swift`:
+    - Re-exports `DSFormRowLayout` from DSCore
+    - Updated documentation with form module overview
+  - Updated Tests:
+    - `Tests/DSFormsTests/DSFormsTests.swift`:
+      - `DSFormConfigurationTests` suite — Configuration presets and custom values
+      - `DSFormLayoutModeTests` suite — Equality tests for auto/fixed modes
+      - `DSFormValidationDisplayModeTests` suite — Case enumeration tests
+  - Created Showcase for all platforms:
+    - iOS: `DSFormShowcaseView` — Configuration controls, layout comparison, density comparison, preset overview
+    - macOS: `DSFormShowcasemacOSView` — Side-by-side layout comparison, density demos, preset cards, focus ring info
+    - watchOS: `DSFormShowcasewatchOSView` — Compact demo showing stacked layout defaults, density comparison
+    - All three platforms route `"dsform"` item to their respective showcase views
+
+**Artifacts:**
+- `Sources/DSForms/DSFormConfiguration.swift` — Form configuration types and environment key
+- `Sources/DSForms/DSForm.swift` — Form container with keyboard avoidance
+- `Sources/DSForms/DSForms.swift` — Updated module exports
+- `Tests/DSFormsTests/DSFormsTests.swift` — Unit tests for configuration
+- `Showcase/ShowcaseiOS/DSFormShowcaseView.swift` — iOS showcase
+- `Showcase/ShowcasemacOS/DSFormShowcasemacOSView.swift` — macOS showcase
+- `Showcase/ShowcasewatchOS/DSFormShowcasewatchOSView.swift` — watchOS showcase
+- Updated root views for all platforms to include DSForm showcase
+
+**Next:**
+- Step 21: DSFormSection — Section grouping with header/footer
+
+---
 
 ### Session 19 - 2026-02-06
 **Completed:**
