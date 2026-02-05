@@ -18,8 +18,8 @@
 ## Current Status
 
 **Phase:** 2 - Theme Resolution and Capabilities  
-**Current Step:** 8 - DSStyles Spec Protocols  
-**Progress:** 7 / 39 steps completed  
+**Current Step:** 9 - DSStyles Default Implementations  
+**Progress:** 8 / 39 steps completed  
 
 ---
 
@@ -35,7 +35,7 @@
 ### Phase 2: Theme Resolution and Capabilities (2/4)
 - [x] Step 6: DSCapabilities System
 - [x] Step 7: ThemeResolver Implementation
-- [ ] Step 8: DSStyles Spec Protocols
+- [x] Step 8: DSStyles Spec Protocols
 - [ ] Step 9: DSStyles Default Implementations
 
 ### Phase 3: Primitives (0/4)
@@ -85,6 +85,90 @@
 ---
 
 ## Session Log
+
+### Session 9 - 2026-02-05
+**Completed:**
+- Step 8: DSStyles Spec Protocols
+  - Created `Sources/DSTheme/Specs/` directory with 7 spec files
+  - **DSSpec.swift** - Base `DSSpec` protocol (Sendable + Equatable, no views)
+  - **DSButtonSpec.swift** - Button component spec:
+    - `DSButtonVariant` enum (primary, secondary, tertiary, destructive)
+    - `DSButtonSize` enum (small/32pt, medium/40pt, large/48pt)
+    - Resolve method: theme + variant + size + DSControlState → concrete styling
+    - Colors: background, foreground, border (variant-aware with disabled/pressed/hovered states)
+    - Effects: shadow, opacity, scaleEffect (pressed→0.97, disabled→0.6)
+    - Typography scales with size (small uses 82% of base)
+  - **DSFieldSpec.swift** - Text field spec:
+    - `DSFieldVariant` enum (default, search with larger radius)
+    - Resolve method: theme + variant + DSControlState + DSValidationState → styling
+    - Validation-priority borders: error→danger, warning→yellow, focused→accent
+    - Focus ring integration from theme
+    - Disabled state reduces opacity and changes background
+  - **DSToggleSpec.swift** - Toggle/switch spec:
+    - Resolve: theme + isOn + DSControlState → track/thumb styling
+    - Track: accent when on, surface when off, with border
+    - Thumb: white circle with shadow
+    - Disabled reduces opacity to 0.5
+  - **DSFormRowSpec.swift** - Form row layout spec:
+    - `DSFormRowLayoutMode` enum (auto, fixed(DSFormRowLayout))
+    - Auto-degradation: iOS→inline, macOS→twoColumn, watchOS→stacked
+    - Two-column provides labelWidth (140pt) with trailing alignment
+    - Stacked: vertical spacing, no horizontal; Inline: horizontal, no vertical
+    - Min height adapts to large tap target preference
+  - **DSCardSpec.swift** - Card elevation spec:
+    - `DSCardElevation` enum (flat, raised, elevated, overlay)
+    - Flat uses border only, no shadow
+    - Dark theme elevated/overlay cards enable glass effect
+    - Dark theme cards always have borders for visibility
+  - **DSListRowSpec.swift** - List row spec:
+    - `DSListRowStyle` enum (plain, prominent, destructive)
+    - Resolve method: theme + style + DSControlState + DSCapabilities → styling
+    - Plain: primary colors; Prominent: accent; Destructive: danger
+    - Min height adapts to capabilities (large tap targets)
+    - Pressed state changes background
+  - Created comprehensive unit tests (67 tests in 7 suites):
+    - `DSButtonSpecTests` - 16 tests (variants, sizes, states, typography, effects)
+    - `DSFieldSpecTests` - 11 tests (variants, states, validation, focus)
+    - `DSToggleSpecTests` - 6 tests (on/off, disabled, dimensions, shadow)
+    - `DSFormRowSpecTests` - 11 tests (auto-degradation, fixed layout, spacing, tap targets)
+    - `DSCardSpecTests` - 8 tests (elevations, glass effect, dark borders)
+    - `DSListRowSpecTests` - 8 tests (styles, disabled, pressed, separator)
+    - `SpecConsistencyTests` - 4 tests (radii consistency, equatable, state difference, protocol conformance)
+  - Updated Showcase apps for all platforms:
+    - iOS: Full spec browser with variant/size/state matrix, theme toggle
+    - macOS: Two-column layout with GroupBox sections for each spec type
+    - watchOS: Compact view showing button variants, form layout, card elevations, row styles
+    - Added "Component Specs" item to ShowcaseCore theme category
+
+**Artifacts:**
+- `Sources/DSTheme/Specs/DSSpec.swift` - Base protocol
+- `Sources/DSTheme/Specs/DSButtonSpec.swift` - Button spec (variants, sizes, states)
+- `Sources/DSTheme/Specs/DSFieldSpec.swift` - Field spec (variants, validation)
+- `Sources/DSTheme/Specs/DSToggleSpec.swift` - Toggle spec (on/off, disabled)
+- `Sources/DSTheme/Specs/DSFormRowSpec.swift` - Form row layout spec (auto-degradation)
+- `Sources/DSTheme/Specs/DSCardSpec.swift` - Card elevation spec (glass effect)
+- `Sources/DSTheme/Specs/DSListRowSpec.swift` - List row spec (styles, platform-adaptive)
+- `Tests/DSThemeTests/DSSpecTests.swift` - 67 unit tests
+- `Showcase/ShowcaseCore/ShowcaseCore.swift` - Added componentspecs item
+- `Showcase/ShowcaseiOS/ShowcaseiOSRootView.swift` - ComponentSpecsShowcaseView
+- `Showcase/ShowcasemacOS/ShowcasemacOSRootView.swift` - ComponentSpecsShowcasemacOSView
+- `Showcase/ShowcasewatchOS/ShowcasewatchOSRootView.swift` - ComponentSpecsShowcasewatchOSView
+
+**Key Design Decisions:**
+- All specs conform to DSSpec protocol (Sendable + Equatable), no SwiftUI views
+- Resolve-then-render pattern: static resolve(theme:...) → concrete spec struct
+- Specs are deterministic and unit-testable (67 tests)
+- DSFormRowSpec uses DSCapabilities for auto-degradation (no #if os() in specs)
+- DSCardSpec enables glass effect only for dark theme elevated/overlay cards
+- DSButtonSpec uses DSControlState (OptionSet) for combined states
+- DSFieldSpec validates border priority: error > warning > focus > default
+- DSListRowSpec adapts min height based on capabilities.prefersLargeTapTargets
+
+**Next Session:**
+- Continue with Phase 2: Theme Resolution and Capabilities
+- Step 9: DSStyles Default Implementations
+
+---
 
 ### Session 8 - 2026-02-05
 **Completed:**
