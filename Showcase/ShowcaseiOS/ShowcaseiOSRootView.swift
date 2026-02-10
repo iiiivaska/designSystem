@@ -135,6 +135,8 @@ struct ShowcaseDetailView: View {
             DSFormShowcaseView()
         case "dsformsection":
             DSFormSectionShowcaseView()
+        case "dsformrow":
+            DSFormRowShowcaseView()
         default:
             // Placeholder for components not yet implemented
             ShowcasePlaceholder(

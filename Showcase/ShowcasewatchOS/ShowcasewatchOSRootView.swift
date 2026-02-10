@@ -126,6 +126,8 @@ struct ShowcasewatchOSDetailView: View {
             DSFormShowcasewatchOSView()
         case "dsformsection":
             DSFormSectionShowcasewatchOSView()
+        case "dsformrow":
+            DSFormRowShowcasewatchOSView()
         default:
             // Placeholder for component demos
             Text("Demo coming soon")

@@ -232,3 +232,205 @@ struct DSSectionFooterTests {
         #expect(footer.title == nil)
     }
 }
+
+// MARK: - DSFormRow Spec Resolution Tests
+
+import DSTheme
+
+@Suite("DSFormRow Spec Resolution Tests")
+struct DSFormRowSpecResolutionTests {
+    
+    // MARK: - Auto-Degradation
+    
+    @Test("Auto mode resolves to inline for iOS capabilities")
+    func testAutoInlineiOS() {
+        let theme = DSTheme.light
+        let capabilities = DSCapabilities.iOS()
+        let spec = DSFormRowSpec.resolve(theme: theme, layoutMode: .auto, capabilities: capabilities)
+        
+        #expect(spec.resolvedLayout == .inline)
+    }
+    
+    @Test("Auto mode resolves to twoColumn for macOS capabilities")
+    func testAutoTwoColumnmacOS() {
+        let theme = DSTheme.light
+        let capabilities = DSCapabilities.macOS()
+        let spec = DSFormRowSpec.resolve(theme: theme, layoutMode: .auto, capabilities: capabilities)
+        
+        #expect(spec.resolvedLayout == .twoColumn)
+    }
+    
+    @Test("Auto mode resolves to stacked for watchOS capabilities")
+    func testAutoStackedwatchOS() {
+        let theme = DSTheme.light
+        let capabilities = DSCapabilities.watchOS()
+        let spec = DSFormRowSpec.resolve(theme: theme, layoutMode: .auto, capabilities: capabilities)
+        
+        #expect(spec.resolvedLayout == .stacked)
+    }
+    
+    // MARK: - Fixed Layout
+    
+    @Test("Fixed layout overrides auto")
+    func testFixedOverridesAuto() {
+        let theme = DSTheme.light
+        let capabilities = DSCapabilities.iOS() // Would default to inline
+        let spec = DSFormRowSpec.resolve(theme: theme, layoutMode: .fixed(.stacked), capabilities: capabilities)
+        
+        #expect(spec.resolvedLayout == .stacked)
+    }
+    
+    @Test("Fixed twoColumn layout on iOS capabilities")
+    func testFixedTwoColumniOS() {
+        let theme = DSTheme.light
+        let capabilities = DSCapabilities.iOS()
+        let spec = DSFormRowSpec.resolve(theme: theme, layoutMode: .fixed(.twoColumn), capabilities: capabilities)
+        
+        #expect(spec.resolvedLayout == .twoColumn)
+        #expect(spec.labelWidth == 140)
+    }
+    
+    // MARK: - Layout-Specific Properties
+    
+    @Test("Inline layout has no labelWidth")
+    func testInlineLabelWidth() {
+        let theme = DSTheme.light
+        let capabilities = DSCapabilities.iOS()
+        let spec = DSFormRowSpec.resolve(theme: theme, layoutMode: .fixed(.inline), capabilities: capabilities)
+        
+        #expect(spec.labelWidth == nil)
+        #expect(spec.horizontalSpacing > 0)
+        #expect(spec.verticalSpacing == 0)
+    }
+    
+    @Test("Stacked layout has vertical spacing and no horizontal")
+    func testStackedSpacing() {
+        let theme = DSTheme.light
+        let capabilities = DSCapabilities.watchOS()
+        let spec = DSFormRowSpec.resolve(theme: theme, layoutMode: .fixed(.stacked), capabilities: capabilities)
+        
+        #expect(spec.labelWidth == nil)
+        #expect(spec.horizontalSpacing == 0)
+        #expect(spec.verticalSpacing > 0)
+    }
+    
+    @Test("TwoColumn layout has label width and trailing alignment")
+    func testTwoColumnLabelProperties() {
+        let theme = DSTheme.light
+        let capabilities = DSCapabilities.macOS()
+        let spec = DSFormRowSpec.resolve(theme: theme, layoutMode: .fixed(.twoColumn), capabilities: capabilities)
+        
+        #expect(spec.labelWidth == 140)
+        #expect(spec.labelAlignment == .trailing)
+        #expect(spec.horizontalSpacing > 0)
+        #expect(spec.verticalSpacing == 0)
+    }
+    
+    // MARK: - Row Properties
+    
+    @Test("Large tap target platforms have taller rows")
+    func testLargeTapTargets() {
+        let theme = DSTheme.light
+        let watchSpec = DSFormRowSpec.resolve(theme: theme, capabilities: DSCapabilities.watchOS())
+        let macSpec = DSFormRowSpec.resolve(theme: theme, capabilities: DSCapabilities.macOS())
+        
+        #expect(watchSpec.minHeight >= macSpec.minHeight)
+    }
+    
+    @Test("Content padding is positive")
+    func testContentPadding() {
+        let theme = DSTheme.light
+        let spec = DSFormRowSpec.resolve(theme: theme, capabilities: DSCapabilities.iOS())
+        
+        #expect(spec.contentPadding.top > 0)
+        #expect(spec.contentPadding.leading > 0)
+        #expect(spec.contentPadding.bottom > 0)
+        #expect(spec.contentPadding.trailing > 0)
+    }
+    
+    @Test("Separator visible by default")
+    func testSeparatorVisible() {
+        let theme = DSTheme.light
+        let spec = DSFormRowSpec.resolve(theme: theme, capabilities: DSCapabilities.iOS())
+        
+        #expect(spec.separatorVisible == true)
+    }
+    
+    @Test("Separator insets have leading padding")
+    func testSeparatorInsets() {
+        let theme = DSTheme.light
+        let spec = DSFormRowSpec.resolve(theme: theme, capabilities: DSCapabilities.iOS())
+        
+        #expect(spec.separatorInsets.leading > 0)
+    }
+    
+    @Test("Animation is present")
+    func testAnimation() {
+        let theme = DSTheme.light
+        let spec = DSFormRowSpec.resolve(theme: theme, capabilities: DSCapabilities.iOS())
+        
+        #expect(spec.animation != nil)
+    }
+    
+    // MARK: - All Layout Combinations
+    
+    @Test("All layout and platform combinations resolve without error")
+    func testAllCombinations() {
+        let themes = [DSTheme.light, DSTheme.dark]
+        let platforms: [DSCapabilities] = [.iOS(), .macOS(), .watchOS()]
+        let layouts: [DSFormRowLayoutMode] = [.auto, .fixed(.inline), .fixed(.stacked), .fixed(.twoColumn)]
+        
+        for theme in themes {
+            for capabilities in platforms {
+                for layout in layouts {
+                    let spec = DSFormRowSpec.resolve(theme: theme, layoutMode: layout, capabilities: capabilities)
+                    
+                    // Verify all specs have valid values
+                    #expect(spec.minHeight > 0)
+                    #expect(spec.contentPadding.top >= 0)
+                    #expect(spec.contentPadding.leading >= 0)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - DSFormRowLayout Tests
+
+@Suite("DSFormRowLayout Tests")
+struct DSFormRowLayoutTests {
+    
+    @Test("All cases exist")
+    func testAllCases() {
+        let cases = DSFormRowLayout.allCases
+        
+        #expect(cases.count == 3)
+        #expect(cases.contains(.inline))
+        #expect(cases.contains(.stacked))
+        #expect(cases.contains(.twoColumn))
+    }
+    
+    @Test("Raw values are unique")
+    func testUniqueRawValues() {
+        let cases = DSFormRowLayout.allCases
+        let rawValues = Set(cases.map(\.rawValue))
+        
+        #expect(rawValues.count == cases.count)
+    }
+    
+    @Test("Equatable conformance")
+    func testEquatable() {
+        #expect(DSFormRowLayout.inline == DSFormRowLayout.inline)
+        #expect(DSFormRowLayout.stacked == DSFormRowLayout.stacked)
+        #expect(DSFormRowLayout.twoColumn == DSFormRowLayout.twoColumn)
+        #expect(DSFormRowLayout.inline != DSFormRowLayout.stacked)
+        #expect(DSFormRowLayout.inline != DSFormRowLayout.twoColumn)
+        #expect(DSFormRowLayout.stacked != DSFormRowLayout.twoColumn)
+    }
+    
+    @Test("Hashable conformance")
+    func testHashable() {
+        let set: Set<DSFormRowLayout> = [.inline, .stacked, .twoColumn, .inline]
+        #expect(set.count == 3)
+    }
+}

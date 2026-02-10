@@ -137,6 +137,8 @@ struct ShowcasemacOSDetailView: View {
             DSFormShowcasemacOSView()
         case "dsformsection":
             DSFormSectionShowcasemacOSView()
+        case "dsformrow":
+            DSFormRowShowcasemacOSView()
         default:
             // Demo sections
             GroupBox("Light Theme") {

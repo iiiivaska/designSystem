@@ -24,6 +24,7 @@ import DSControls
 ///
 /// - ``DSForm``: Main form container with keyboard avoidance
 /// - ``DSFormSection``: Section grouping with header/footer
+/// - ``DSFormRow``: Flexible row layout with slot-based architecture
 /// - ``DSSectionHeader``: Styled section header with optional icon
 /// - ``DSSectionFooter``: Styled section footer with description text
 /// - ``DSFormConfiguration``: Configuration for form behavior
@@ -37,12 +38,18 @@ import DSControls
 ///
 /// DSForm {
 ///     DSFormSection("Account") {
-///         DSTextField("Name", text: $name)
-///         DSTextField("Email", text: $email)
+///         DSFormRow("Name") {
+///             DSTextField("Enter name", text: $name)
+///         }
+///         DSFormRow("Email") {
+///             DSTextField("Enter email", text: $email)
+///         }
 ///     }
 ///
 ///     DSFormSection("Privacy", footer: "Your data is encrypted.") {
-///         DSToggle("Analytics", isOn: $analytics)
+///         DSFormRow("Analytics") {
+///             DSToggle("Analytics", isOn: $analytics)
+///         }
 ///     }
 /// }
 /// ```
@@ -60,6 +67,10 @@ import DSControls
 /// - ``DSSectionHeader``
 /// - ``DSSectionFooter``
 /// - ``DSFormSectionStyle``
+///
+/// ### Rows
+///
+/// - ``DSFormRow``
 ///
 /// ### Layout Configuration
 ///
