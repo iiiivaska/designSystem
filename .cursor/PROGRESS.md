@@ -18,8 +18,8 @@
 ## Current Status
 
 **Phase:** 5 - Forms MVP (In Progress)  
-**Current Step:** 20 - DSForm Container (Done)  
-**Progress:** 20 / 39 steps completed  
+**Current Step:** 21 - DSFormSection (Done)  
+**Progress:** 21 / 39 steps completed  
 
 ---
 
@@ -52,9 +52,9 @@
 - [x] Step 18: DSStepper Control
 - [x] Step 19: DSSlider Control (optional)
 
-### Phase 5: Forms MVP (1/5)
+### Phase 5: Forms MVP (2/5)
 - [x] Step 20: DSForm Container
-- [ ] Step 21: DSFormSection
+- [x] Step 21: DSFormSection
 - [ ] Step 22: DSFormRow Layout System
 - [ ] Step 23: Form Validation System
 - [ ] Step 24: Focus Chain Integration
@@ -146,11 +146,97 @@
 - Updated root views for all platforms to include DSForm showcase
 
 **Next:**
-- Step 21: DSFormSection — Section grouping with header/footer
+- Step 22: DSFormRow Layout System
 
 ---
 
-### Session 19 - 2026-02-06
+### Session 21 - 2026-02-10
+**Completed:**
+- Step 21: DSFormSection — Section header/footer grouping
+  - Created `Sources/DSForms/DSFormSection.swift` — Main section container:
+    - `DSFormSection<Header, Footer, Content>` generic view with ViewBuilder slots
+    - Three section styles via `DSFormSectionStyle` enum:
+      - `.plain` — No background or border, simple vertical grouping
+      - `.grouped` — Surface background with subtle border
+      - `.insetGrouped` — Elevated surface with rounded corners and shadow (iOS Settings style)
+    - Collapsible support (macOS):
+      - `isCollapsible: Bool` parameter enables collapse/expand
+      - Uses `capabilities.supportsHover` — only on macOS, no #if os() in component
+      - Animated chevron indicator (right when collapsed, down when expanded)
+      - Content and footer hidden when collapsed
+    - Convenience initializers:
+      - `init(_ title:)` — Simple text header, no footer
+      - `init(_ title: footer:)` — Text header + text footer
+      - `init(style:content:)` — No header/footer, style only
+      - `init(header: footer: content:)` — Full custom header/footer/content
+    - Environment reads: dsTheme, dsCapabilities, dsFormConfiguration
+    - Section spacing uses `theme.spacing.gap.section / 2` for top/bottom padding
+    - Accessibility: section is an accessible container group
+    - 8 previews: plain/grouped/inset-grouped × light/dark, custom header+footer, collapsible
+  - Created `Sources/DSForms/DSSectionHeader.swift` — Styled section header:
+    - `DSSectionHeader` view with title + optional SF Symbol icon
+    - Uses `DSTextRole.sectionHeader` typography role from theme
+    - Optional `icon` parameter with `DSIconColor` for semantic coloring
+    - Icon rendered via `DSIcon` (small size), hidden from accessibility
+    - Header text gets `.isHeader` accessibility trait
+    - Both `LocalizedStringKey` and `StringProtocol` initializers
+    - 4 previews: simple/with icons × light/dark
+  - Created `Sources/DSForms/DSSectionFooter.swift` — Styled section footer:
+    - `DSSectionFooter` view with optional title + description text
+    - Description uses `DSTextRole.helperText` (tertiary color)
+    - Title uses `DSTextRole.footnote` with semibold weight (tertiary color)
+    - Multiple initializers: description-only, title+description, string variants
+    - 4 previews: simple/with title × light/dark
+  - Updated `Sources/DSForms/DSForms.swift`:
+    - Added DSFormSection, DSSectionHeader, DSSectionFooter, DSFormSectionStyle to module documentation
+    - Added Sections topic group
+  - Updated Tests:
+    - `Tests/DSFormsTests/DSFormsTests.swift`:
+      - `DSFormSectionStyleTests` suite — 8 tests:
+        - All cases exist (3 styles)
+        - Raw values are unique
+        - Display names are meaningful
+        - IDs match raw values
+        - Equatable conformance
+        - Hashable conformance
+        - Sendable conformance
+        - CaseIterable conformance
+      - `DSSectionFooterTests` suite — 3 tests:
+        - Footer with description only has nil title
+        - Footer with title and description
+        - String initializer sets description
+  - Created Showcase for all platforms:
+    - iOS: `DSFormSectionShowcaseView` — style picker, interactive demo, style comparison, custom header/footer, header styles, footer styles
+    - macOS: `DSFormSectionShowcasemacOSView` — two-column layout with interactive demo + custom/collapsible sections, style comparison, headers & footers
+    - watchOS: `DSFormSectionShowcasewatchOSView` — compact demo with plain/grouped/inset-grouped sections, footer, custom header, platform info
+    - All three platforms route `"dsformsection"` item to their respective showcase views
+
+**Artifacts:**
+- `Sources/DSForms/DSFormSection.swift` — Section container with header/footer/styles/collapsible
+- `Sources/DSForms/DSSectionHeader.swift` — Styled section header with optional icon
+- `Sources/DSForms/DSSectionFooter.swift` — Styled section footer with description text
+- `Sources/DSForms/DSForms.swift` — Updated module documentation
+- `Tests/DSFormsTests/DSFormsTests.swift` — 11 new tests (23 total in file, 373 total)
+- `Showcase/ShowcaseiOS/DSFormSectionShowcaseView.swift` — iOS showcase
+- `Showcase/ShowcasemacOS/DSFormSectionShowcasemacOSView.swift` — macOS showcase
+- `Showcase/ShowcasewatchOS/DSFormSectionShowcasewatchOSView.swift` — watchOS showcase
+- Updated root views for all platforms to include DSFormSection showcase routing
+
+**Key Design Decisions:**
+- DSFormSection uses generic ViewBuilder slots for maximum flexibility (header, footer, content)
+- Three section styles (plain/grouped/insetGrouped) match common iOS/macOS settings patterns
+- Collapsible sections use capabilities.supportsHover — no #if os() in component code
+- Section styles use theme colors/radii/shadows from the resolve-then-render pattern
+- DSSectionHeader uses DSTextRole.sectionHeader for consistent typography
+- DSSectionFooter uses DSTextRole.helperText for subtle secondary text
+- Convenience initializers provide ergonomic API for common cases (title-only, title+footer)
+- 373 total tests pass across all modules
+
+**Phase 5: Forms MVP — 2/5 steps complete**
+
+---
+
+### Session 20 - 2026-02-06
 **Completed:**
 - Step 19: DSSlider Control — Range slider with watchOS fallback
   - Created `Sources/DSTheme/Specs/DSSliderSpec.swift` — Slider specification:

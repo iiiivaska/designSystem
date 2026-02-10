@@ -133,6 +133,8 @@ struct ShowcaseDetailView: View {
             DSSliderShowcaseView()
         case "dsform":
             DSFormShowcaseView()
+        case "dsformsection":
+            DSFormSectionShowcaseView()
         default:
             // Placeholder for components not yet implemented
             ShowcasePlaceholder(

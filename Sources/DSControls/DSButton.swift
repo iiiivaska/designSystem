@@ -14,7 +14,7 @@ import DSPrimitives
 /// A themed button control with variant, size, and state support.
 ///
 /// `DSButton` is the primary interactive button in the design system.
-/// It resolves its styling from ``DSButtonSpec`` through the theme,
+/// It resolves its styling from ``DSTheme/DSButtonSpec`` through the theme,
 /// ensuring consistent appearance across the application.
 ///
 /// ## Overview
@@ -76,7 +76,7 @@ import DSPrimitives
 ///
 /// ### Styling
 ///
-/// - ``DSButtonSpec``
+/// - ``DSTheme/DSButtonSpec``
 /// - ``DSButtonStyleModifier``
 public struct DSButton: View {
     

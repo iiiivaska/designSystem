@@ -135,3 +135,100 @@ struct DSFormValidationDisplayModeTests {
         #expect(cases.contains(.hidden))
     }
 }
+
+// MARK: - DSFormSectionStyle Tests
+
+@Suite("DSFormSectionStyle Tests")
+struct DSFormSectionStyleTests {
+    
+    @Test("All cases exist")
+    func testAllCases() {
+        let cases = DSFormSectionStyle.allCases
+        
+        #expect(cases.count == 3)
+        #expect(cases.contains(.plain))
+        #expect(cases.contains(.grouped))
+        #expect(cases.contains(.insetGrouped))
+    }
+    
+    @Test("Raw values are unique")
+    func testUniqueRawValues() {
+        let cases = DSFormSectionStyle.allCases
+        let rawValues = Set(cases.map(\.rawValue))
+        
+        #expect(rawValues.count == cases.count)
+    }
+    
+    @Test("Display names are meaningful")
+    func testDisplayNames() {
+        #expect(DSFormSectionStyle.plain.displayName == "Plain")
+        #expect(DSFormSectionStyle.grouped.displayName == "Grouped")
+        #expect(DSFormSectionStyle.insetGrouped.displayName == "Inset Grouped")
+    }
+    
+    @Test("IDs match raw values")
+    func testIDs() {
+        for style in DSFormSectionStyle.allCases {
+            #expect(style.id == style.rawValue)
+        }
+    }
+    
+    @Test("Equatable conformance")
+    func testEquatable() {
+        #expect(DSFormSectionStyle.plain == DSFormSectionStyle.plain)
+        #expect(DSFormSectionStyle.grouped == DSFormSectionStyle.grouped)
+        #expect(DSFormSectionStyle.plain != DSFormSectionStyle.grouped)
+        #expect(DSFormSectionStyle.grouped != DSFormSectionStyle.insetGrouped)
+    }
+    
+    @Test("Hashable conformance")
+    func testHashable() {
+        let set: Set<DSFormSectionStyle> = [.plain, .grouped, .insetGrouped, .plain]
+        #expect(set.count == 3)
+    }
+    
+    @Test("Sendable conformance compiles")
+    func testSendable() {
+        let style: DSFormSectionStyle = .grouped
+        let _: any Sendable = style
+        #expect(true)
+    }
+    
+    @Test("CaseIterable conformance provides all cases")
+    func testCaseIterable() {
+        let allCases = DSFormSectionStyle.allCases
+        
+        #expect(allCases.contains(.plain))
+        #expect(allCases.contains(.grouped))
+        #expect(allCases.contains(.insetGrouped))
+    }
+}
+
+// MARK: - DSSectionFooter Tests
+
+@Suite("DSSectionFooter Tests")
+struct DSSectionFooterTests {
+    
+    @Test("Footer with description only has nil title")
+    func testDescriptionOnly() {
+        let footer = DSSectionFooter(title: nil, description: "Help text")
+        
+        #expect(footer.title == nil)
+        #expect(footer.description == "Help text")
+    }
+    
+    @Test("Footer with title and description")
+    func testTitleAndDescription() {
+        let footer = DSSectionFooter(title: "Note", description: "Some description")
+        
+        #expect(footer.title == "Note")
+        #expect(footer.description == "Some description")
+    }
+    
+    @Test("String initializer sets description")
+    func testStringInit() {
+        let footer = DSSectionFooter("Help text here")
+        
+        #expect(footer.title == nil)
+    }
+}

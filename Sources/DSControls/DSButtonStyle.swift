@@ -11,7 +11,7 @@ import DSPrimitives
 
 // MARK: - DSButtonStyleModifier
 
-/// A SwiftUI `ButtonStyle` that applies ``DSButtonSpec`` styling.
+/// A SwiftUI `ButtonStyle` that applies ``DSTheme/DSButtonSpec`` styling.
 ///
 /// This style resolves the button's appearance from the theme based
 /// on variant, size, and current interaction state. It handles
@@ -26,14 +26,14 @@ import DSPrimitives
 ///
 /// 1. The style detects whether the button is pressed via `configuration.isPressed`
 /// 2. It builds a ``DSControlState`` combining pressed, disabled, and loading flags
-/// 3. It resolves a ``DSButtonSpec`` from the theme
+/// 3. It resolves a ``DSTheme/DSButtonSpec`` from the theme
 /// 4. It renders the button using the spec's concrete values
 ///
 /// ## Topics
 ///
 /// ### Resolution
 ///
-/// - ``DSButtonSpec``
+/// - ``DSTheme/DSButtonSpec``
 /// - ``DSButtonVariant``
 /// - ``DSButtonSize``
 public struct DSButtonStyleModifier: ButtonStyle {

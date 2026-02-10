@@ -23,6 +23,9 @@ import DSControls
 /// ## Key Components
 ///
 /// - ``DSForm``: Main form container with keyboard avoidance
+/// - ``DSFormSection``: Section grouping with header/footer
+/// - ``DSSectionHeader``: Styled section header with optional icon
+/// - ``DSSectionFooter``: Styled section footer with description text
 /// - ``DSFormConfiguration``: Configuration for form behavior
 /// - ``DSFormLayoutMode``: Layout mode selection (auto/fixed)
 /// - ``DSFormValidationDisplayMode``: How validation is displayed
@@ -37,6 +40,10 @@ import DSControls
 ///         DSTextField("Name", text: $name)
 ///         DSTextField("Email", text: $email)
 ///     }
+///
+///     DSFormSection("Privacy", footer: "Your data is encrypted.") {
+///         DSToggle("Analytics", isOn: $analytics)
+///     }
 /// }
 /// ```
 ///
@@ -46,6 +53,13 @@ import DSControls
 ///
 /// - ``DSForm``
 /// - ``DSFormConfiguration``
+///
+/// ### Sections
+///
+/// - ``DSFormSection``
+/// - ``DSSectionHeader``
+/// - ``DSSectionFooter``
+/// - ``DSFormSectionStyle``
 ///
 /// ### Layout Configuration
 ///
