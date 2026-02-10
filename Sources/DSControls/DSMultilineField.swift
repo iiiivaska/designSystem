@@ -156,6 +156,27 @@ public struct DSMultilineField: View {
     
     @ViewBuilder
     private func editorContent(spec: DSFieldSpec) -> some View {
+        #if os(watchOS)
+        // watchOS: TextEditor is unavailable, use TextField with vertical axis
+        TextField(text: $text, prompt: Text(placeholder), axis: .vertical) {
+            EmptyView()
+        }
+        .font(spec.textTypography.font)
+        .foregroundStyle(spec.foregroundColor)
+        .focused($isFocused)
+        .disabled(isDisabled)
+        .lineLimit(3...10)
+        .padding(.horizontal, spec.horizontalPadding)
+        .padding(.vertical, spec.verticalPadding)
+        .background(
+            RoundedRectangle(cornerRadius: spec.cornerRadius, style: .continuous)
+                .fill(spec.backgroundColor)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: spec.cornerRadius, style: .continuous)
+                .stroke(spec.borderColor, lineWidth: spec.borderWidth)
+        )
+        #else
         ZStack(alignment: .topLeading) {
             // Placeholder
             if text.isEmpty {
@@ -198,6 +219,7 @@ public struct DSMultilineField: View {
                 isFocused = true
             }
         }
+        #endif
     }
 }
 
@@ -231,6 +253,7 @@ extension DSMultilineField {
 
 // MARK: - Previews
 
+#if !os(watchOS)
 #Preview("Multiline - Light") {
     VStack(spacing: 24) {
         DSMultilineField(
@@ -298,3 +321,24 @@ extension DSMultilineField {
     .padding()
     .dsTheme(.light)
 }
+#endif
+
+#if os(watchOS)
+#Preview("watchOS - Multiline") {
+    VStack(spacing: 12) {
+        DSMultilineField(
+            "Notes",
+            text: .constant(""),
+            placeholder: "Enter notes..."
+        )
+        
+        DSMultilineField(
+            "Bio",
+            text: .constant("A short bio"),
+            placeholder: "About you",
+            isRequired: true
+        )
+    }
+    .dsTheme(.dark)
+}
+#endif

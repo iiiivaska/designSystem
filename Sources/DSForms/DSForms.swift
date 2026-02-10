@@ -17,8 +17,9 @@ import DSControls
 
 /// DSForms module namespace.
 ///
-/// The DSForms module provides form containers, sections, and row components
-/// for building structured input forms across iOS, macOS, and watchOS.
+/// The DSForms module provides form containers, sections, row components,
+/// and a validation system for building structured input forms across
+/// iOS, macOS, and watchOS.
 ///
 /// ## Key Components
 ///
@@ -31,27 +32,34 @@ import DSControls
 /// - ``DSFormLayoutMode``: Layout mode selection (auto/fixed)
 /// - ``DSFormValidationDisplayMode``: How validation is displayed
 ///
+/// ## Validation
+///
+/// - ``DSValidationView``: Standalone validation message display
+/// - ``DSFormValidationContext``: Observable form-level validation state
+/// - ``DSValidationSummary``: Banner summarizing all validation issues
+/// - ``DSFormValidatedRow``: Row with automatic validation display
+/// - ``DSRequiredMarker``: Required field indicator (asterisk)
+///
 /// ## Usage
 ///
 /// ```swift
 /// import DSForms
 ///
+/// @StateObject private var validation = DSFormValidationContext()
+///
 /// DSForm {
+///     DSValidationSummary(context: validation)
+///
 ///     DSFormSection("Account") {
-///         DSFormRow("Name") {
+///         DSFormValidatedRow("Name", fieldId: "name", isRequired: true) {
 ///             DSTextField("Enter name", text: $name)
 ///         }
-///         DSFormRow("Email") {
+///         DSFormValidatedRow("Email", fieldId: "email", isRequired: true) {
 ///             DSTextField("Enter email", text: $email)
 ///         }
 ///     }
-///
-///     DSFormSection("Privacy", footer: "Your data is encrypted.") {
-///         DSFormRow("Analytics") {
-///             DSToggle("Analytics", isOn: $analytics)
-///         }
-///     }
 /// }
+/// .dsFormValidation(validation)
 /// ```
 ///
 /// ## Topics
@@ -71,6 +79,16 @@ import DSControls
 /// ### Rows
 ///
 /// - ``DSFormRow``
+/// - ``DSFormValidatedRow``
+///
+/// ### Validation
+///
+/// - ``DSValidationView``
+/// - ``DSValidationViewStyle``
+/// - ``DSFormValidationContext``
+/// - ``DSValidationSummary``
+/// - ``DSRequiredMarker``
+/// - ``DSRequiredMarkerSize``
 ///
 /// ### Layout Configuration
 ///

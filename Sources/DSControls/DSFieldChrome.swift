@@ -272,6 +272,7 @@ extension DSFieldChrome {
 
 // MARK: - Previews
 
+#if !os(watchOS)
 #Preview("With Label - Light") {
     VStack(spacing: 24) {
         DSFieldChrome(label: "Email", isRequired: true) {
@@ -343,3 +344,32 @@ extension DSFieldChrome {
     .dsTheme(.dark)
     .preferredColorScheme(.dark)
 }
+#endif
+
+#if os(watchOS)
+#Preview("watchOS - With Label") {
+    VStack(spacing: 12) {
+        DSFieldChrome(label: "Email", isRequired: true) {
+            TextField("Email", text: .constant(""))
+        }
+        
+        DSFieldChrome(label: "Notes", helperText: "Optional") {
+            TextField("Notes", text: .constant(""))
+        }
+    }
+    .dsTheme(.dark)
+}
+
+#Preview("watchOS - Validation") {
+    VStack(spacing: 12) {
+        DSFieldChrome(label: "Email", validation: .error(message: "Invalid")) {
+            TextField("Email", text: .constant("bad"))
+        }
+        
+        DSFieldChrome(label: "Password", validation: .warning(message: "Weak")) {
+            TextField("Password", text: .constant("pass"))
+        }
+    }
+    .dsTheme(.dark)
+}
+#endif

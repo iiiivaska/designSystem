@@ -231,12 +231,14 @@ public struct DSCheckbox: View {
         .buttonStyle(.plain)
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.5 : 1.0)
+        #if !os(watchOS)
         .onHover { hovering in
             guard capabilities.supportsHover else { return }
             withAnimation(theme.motion.component.cardHover) {
                 isHovered = hovering
             }
         }
+        #endif
         .accessibilityAddTraits(.isToggle)
         .accessibilityValue(accessibilityStateText)
         .accessibilityHint(isDisabled ? "" : "Double tap to toggle")

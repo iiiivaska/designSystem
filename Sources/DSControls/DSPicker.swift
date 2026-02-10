@@ -271,6 +271,15 @@ public struct DSPicker<SelectionValue: Hashable & Identifiable & Sendable, Optio
     
     @ViewBuilder
     private var pickerContent: some View {
+        #if os(watchOS)
+        // watchOS only supports sheet and navigation presentations
+        switch resolvedPresentation {
+        case .sheet, .menu, .popover:
+            sheetPresentation
+        case .navigation:
+            navigationPresentation
+        }
+        #else
         switch resolvedPresentation {
         case .menu:
             menuPresentation
@@ -281,10 +290,12 @@ public struct DSPicker<SelectionValue: Hashable & Identifiable & Sendable, Optio
         case .navigation:
             navigationPresentation
         }
+        #endif
     }
     
     // MARK: - Menu Presentation
     
+    #if !os(watchOS)
     /// Menu-style picker (macOS default, compact).
     private var menuPresentation: some View {
         Menu {
@@ -310,10 +321,11 @@ public struct DSPicker<SelectionValue: Hashable & Identifiable & Sendable, Optio
         .disabled(isDisabled)
         .accessibilityLabel(title)
     }
+    #endif
     
     // MARK: - Sheet Presentation
     
-    /// Sheet-style picker (iOS default).
+    /// Sheet-style picker (iOS default, watchOS fallback for menu/popover).
     private var sheetPresentation: some View {
         Button {
             isSheetPresented = true
@@ -338,13 +350,16 @@ public struct DSPicker<SelectionValue: Hashable & Identifiable & Sendable, Optio
                 #endif
             }
             .dsTheme(theme)
+            #if !os(watchOS)
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
+            #endif
         }
     }
     
     // MARK: - Popover Presentation
     
+    #if !os(watchOS)
     /// Popover-style picker (macOS alternative, iPadOS).
     private var popoverPresentation: some View {
         Button {
@@ -358,7 +373,6 @@ public struct DSPicker<SelectionValue: Hashable & Identifiable & Sendable, Optio
         .popover(isPresented: $isPopoverPresented) {
             NavigationStack {
                 optionsListView
-                #if !os(watchOS)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Done") {
@@ -367,12 +381,12 @@ public struct DSPicker<SelectionValue: Hashable & Identifiable & Sendable, Optio
                         .foregroundStyle(theme.colors.accent.primary)
                     }
                 }
-                #endif
             }
             .dsTheme(theme)
             .frame(minWidth: 220, minHeight: 200)
         }
     }
+    #endif
     
     // MARK: - Navigation Presentation
     

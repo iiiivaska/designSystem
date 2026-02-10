@@ -9,6 +9,10 @@ import DSCore
 import DSTheme
 import DSPrimitives
 
+#if os(watchOS)
+import WatchKit
+#endif
+
 // MARK: - DSFormRow
 
 /// A flexible form row that arranges label and control content according
@@ -309,10 +313,12 @@ public struct DSFormRow<Label: View, Control: View, Accessory: View, Footer: Vie
 /// Cross-platform display scale factor.
 private enum UIScale {
     static var factor: CGFloat {
-        #if os(iOS) || os(watchOS)
+        #if os(iOS)
         return UIScreen.main.scale
         #elseif os(macOS)
         return NSScreen.main?.backingScaleFactor ?? 2.0
+        #elseif os(watchOS)
+        return WKInterfaceDevice.current().screenScale
         #else
         return 2.0
         #endif
@@ -750,6 +756,7 @@ extension View {
     .environment(\.dsFormResolvedLayout, .inline)
 }
 
+#if !os(watchOS)
 #Preview("Stacked Layout - Light") {
     VStack(spacing: 0) {
         DSFormRow("Username", layout: .stacked) {
@@ -847,6 +854,7 @@ extension View {
     }
     .dsTheme(.light)
 }
+#endif
 
 #Preview("Dark Theme") {
     VStack(spacing: 0) {

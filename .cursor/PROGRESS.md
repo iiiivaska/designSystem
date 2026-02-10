@@ -18,8 +18,8 @@
 ## Current Status
 
 **Phase:** 5 - Forms MVP (In Progress)  
-**Current Step:** 21 - DSFormSection (Done)  
-**Progress:** 21 / 39 steps completed  
+**Current Step:** 23 - Form Validation System (Done)  
+**Progress:** 23 / 39 steps completed  
 
 ---
 
@@ -52,11 +52,11 @@
 - [x] Step 18: DSStepper Control
 - [x] Step 19: DSSlider Control (optional)
 
-### Phase 5: Forms MVP (2/5)
+### Phase 5: Forms MVP (4/5)
 - [x] Step 20: DSForm Container
 - [x] Step 21: DSFormSection
-- [ ] Step 22: DSFormRow Layout System
-- [ ] Step 23: Form Validation System
+- [x] Step 22: DSFormRow Layout System
+- [x] Step 23: Form Validation System
 - [ ] Step 24: Focus Chain Integration
 
 ### Phase 6: Settings Patterns MVP (0/7)
@@ -86,7 +86,127 @@
 
 ## Session Log
 
-### Session 20 - 2026-02-06
+### Session 23 - 2026-02-11
+**Completed:**
+- Step 23: Form Validation System — Validation state display and propagation
+  - Created `Sources/DSForms/DSValidationView.swift` — Standalone validation message display:
+    - `DSValidationView` view rendering validation state as icon + message
+    - Two visual styles via `DSValidationViewStyle` enum:
+      - `.compact` — Inline icon + text (default, for field-level validation)
+      - `.banner` — Full-width block with tinted background + border (for prominent messages)
+    - Supports all validation states: error (red), warning (yellow), success (green), validating (spinner)
+    - Theme-aware: uses `theme.colors.state.*` for severity colors, `theme.typography.component.helperText` for text
+    - Animated appearance/disappearance via `theme.motion.component.validationAppear`
+    - `animated: Bool` parameter to disable transitions when needed
+    - Accessibility: severity prefix announced to VoiceOver (e.g., "Error: This field is required")
+    - Validating state shows `ProgressView` with "Validating…" text
+    - Banner style includes optional title header per severity level
+    - Long messages wrap with `fixedSize(horizontal: false, vertical: true)`
+    - Previews: compact/banner × light/dark, long messages, watchOS
+  - Created `Sources/DSForms/DSFormValidation.swift` — Form-level validation system:
+    - `DSFormValidationContext` (`@MainActor ObservableObject`) — central form validation manager:
+      - `fieldStates: [String: DSValidationState]` — per-field state registry
+      - `showValidation: Bool` — controls whether messages are visible (prevents premature errors)
+      - `set(_:for:)` / `clear(for:)` / `clearAll()` — state management
+      - `state(for:)` / `effectiveState(for:)` — state queries (effective respects showValidation)
+      - `isFormValid` — checks all fields pass validation
+      - `allErrors` / `allWarnings` — lists of (fieldId, message) tuples
+      - `highestSeverity` / `errorCount` / `warningCount` — aggregate queries
+      - `validate(_:for:rules:)` — applies `DSValidationRule` array and updates field state
+      - `validateAll()` — enables showValidation and returns form validity
+      - `toResult()` — converts to `DSFormValidationResult` for snapshot use
+    - Environment keys:
+      - `dsFormValidationContext` — form-level validation context (optional)
+      - `dsFieldValidation` — per-field validation state
+    - View modifiers:
+      - `.dsFormValidation(_:)` — injects context into environment + EnvironmentObject
+      - `.dsFieldValidation(_:)` — sets field-level validation state
+    - `DSValidationSummary` view — banner summarizing all form errors/warnings:
+      - Reads from `DSFormValidationContext` via `@ObservedObject`
+      - Shows header with error/warning count text
+      - Lists individual errors (danger color) then warnings (yellow)
+      - Hidden when no issues or `showValidation` is false
+      - Animated appearance/disappearance
+      - Full accessibility label combining all error/warning messages
+    - `DSFormValidatedRow<Control>` view — convenience row with automatic validation:
+      - Combines `DSFormRow` + `DSRequiredMarker` + `DSValidationView`
+      - Reads validation state from `DSFormValidationContext` via environment
+      - Respects `DSFormValidationDisplayMode` (below/inline: shows messages; summary/hidden: suppresses)
+      - Title, fieldId, isRequired, layout parameters
+      - `LocalizedStringKey` and `StringProtocol` initializers
+    - Previews: context demo, summary demo, validated row demo (light + dark)
+  - Created `Sources/DSForms/DSRequiredMarker.swift` — Required field indicator:
+    - `DSRequiredMarker` view — themed red asterisk with accessibility
+    - `DSRequiredMarkerSize` enum: `.small` (caption), `.standard` (footnote semibold), `.large` (body semibold)
+    - Uses `theme.colors.state.danger` for color (customizable via `color:` parameter)
+    - Accessibility label: "Required"
+    - View extension `.dsRequired(_: Bool)` — appends marker conditionally
+    - Previews: sizes, modifier usage, custom colors, watchOS
+  - Updated `Sources/DSForms/DSForms.swift`:
+    - Added validation types to module documentation
+    - Added Validation topic group: DSValidationView, DSValidationViewStyle, DSFormValidationContext, DSValidationSummary, DSFormValidatedRow, DSRequiredMarker, DSRequiredMarkerSize
+    - Updated usage example to show validation integration
+  - Created Showcase for all platforms:
+    - iOS: `DSValidationShowcaseView` — compact/banner states, required markers, interactive form validation, summary demo, validated rows, display modes reference
+    - macOS: `DSValidationShowcasemacOSView` — light/dark theme sections, two-column form layout, Grid-based interactive demo, summary controls
+    - watchOS: `DSValidationShowcasewatchOSView` — compact/banner states, required markers, interactive validation demo
+    - All three platforms route `"dsvalidation"` item to their respective showcase views
+
+**Artifacts:**
+- `Sources/DSForms/DSValidationView.swift` — Standalone validation message display (compact/banner)
+- `Sources/DSForms/DSFormValidation.swift` — Form validation context, summary, validated row
+- `Sources/DSForms/DSRequiredMarker.swift` — Required field asterisk indicator
+- `Sources/DSForms/DSForms.swift` — Updated module documentation
+- `Showcase/ShowcaseiOS/DSValidationShowcaseView.swift` — iOS showcase
+- `Showcase/ShowcasemacOS/DSValidationShowcasemacOSView.swift` — macOS showcase
+- `Showcase/ShowcasewatchOS/DSValidationShowcasewatchOSView.swift` — watchOS showcase
+- Updated root views for all platforms to include Validation showcase routing
+
+**Key Design Decisions:**
+- `DSFormValidationContext` is `@MainActor ObservableObject` for safe state management on UI thread
+- `showValidation` flag prevents showing errors before user has interacted (call `validateAll()` on submit)
+- `effectiveState(for:)` vs `state(for:)` — effective respects showValidation flag
+- `DSValidationView` is a standalone reusable component — not tied to form context
+- `DSFormValidatedRow` is a convenience composition of DSFormRow + DSRequiredMarker + DSValidationView
+- Environment-based propagation: context flows down, field states flow up via `set(_:for:)`
+- Supports all DSFormValidationDisplayMode options: inline/below show messages, summary/hidden suppress per-row messages
+- `DSValidationSummary` provides top-of-form error/warning banner for summary mode
+- No `#if os()` in any validation component — all platform-agnostic
+- Banner style uses 8% opacity background + 20% opacity border for subtle tinted appearance
+
+**Phase 5: Forms MVP — 4/5 steps complete**
+
+---
+
+### Session 22 - 2026-02-10
+**Completed:**
+- Step 22: DSFormRow Layout System — Flexible row layout with inline/stacked/twoColumn modes
+  - Created `Sources/DSForms/DSFormRow.swift` — Form row layout component:
+    - `DSFormRow<Label, Control, Accessory, Footer>` generic view with four ViewBuilder slots
+    - Three layout modes: inline (label left, control right), stacked (label above control), twoColumn (fixed-width label column)
+    - Layout resolved from environment `dsFormResolvedLayout` or per-row override
+    - Resolves `DSFormRowSpec` from theme for spacing, height, separator, animation
+    - Separator line with configurable visibility (per-row or form configuration)
+    - Footer content below main row with horizontal padding matching content
+    - Cross-platform `UIScale` helper for hairline separator rendering
+    - Convenience initializers: label+control, label+control+footer, label+control+accessory, string title variants
+    - View modifier `.dsFormRowLayout(_:)` for overriding layout in subtree
+    - Accessibility: row is accessible container with children
+    - Extensive previews: inline, stacked, twoColumn, all layouts comparison, dark theme, watchOS, macOS
+  - Created Showcase for all platforms:
+    - iOS: `DSFormRowShowcaseView` — layout comparison, interactive demo
+    - macOS: `DSFormRowShowcasemacOSView` — two-column macOS layout demo
+    - watchOS: `DSFormRowShowcasewatchOSView` — stacked layout demo
+
+**Artifacts:**
+- `Sources/DSForms/DSFormRow.swift` — Form row layout with slot-based architecture
+- `Showcase/ShowcaseiOS/DSFormRowShowcaseView.swift` — iOS showcase
+- `Showcase/ShowcasemacOS/DSFormRowShowcasemacOSView.swift` — macOS showcase
+- `Showcase/ShowcasewatchOS/DSFormRowShowcasewatchOSView.swift` — watchOS showcase
+
+---
+
+### Session 21 - 2026-02-10
 **Completed:**
 - Step 20: DSForm Container — Form layout with keyboard avoidance
   - Created `Sources/DSForms/DSFormConfiguration.swift` — Form configuration:
